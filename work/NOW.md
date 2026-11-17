@@ -12,7 +12,9 @@ Rule: [SR-WORK-NOW](../records/0061_WORK-now.md).
 
 | session | surface | started | working on |
 |---|---|---|---|
-| 641d8f75-a5c6-4dfb-8130-fcf5cc1675e0 | Claude Code | 2026-11-07 10:33 | lockmaster 0.0.3 published; idle — W-17 is the decider's |
+| 79684456-5d69-408e-b903-7576153cf9b6 | Claude Code | 2026-11-17 23:49 | W-21 rename landing — edits done and tested; waiting on the decider to confirm landing via `PYTHONPATH=src python3 -m docketkit save` |
+| 01f6ee61-89c7-443d-90b0-b5630d5f5c2d | Claude Code | 2026-11-18 00:08 |  |
+| b3cf26b2-0fc2-4dc1-bc7d-b3e8d8d2e3a7 | Claude Code | 2026-11-18 00:08 |  |
 
 ## Resources this session created
 

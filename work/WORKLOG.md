@@ -24,6 +24,22 @@ entry is corrected by a new one. Distinct from `INTERVIEW.md`, which is the
 
 ---
 
+## 2026-11-17 — lockmaster renamed docketkit  ·  Cowork (Opus 5.5)
+
+- **Asked:** *"Rename the project "lockmaster" to "docketkit" everywhere"* — repo, folder, PyPI package, module, CLI (`docketkit` and `dk`); the kit's `docket` skill to `inbox-review`; `lm/` → `dk/`; the trailer, keeping the old one readable.
+- **Done:** the rename across `src/` (now `src/docketkit/`), `kit/`, `.claude/` (reinstalled from `kit/`), records, docs, scripts, CI and the live work files; compatibility for repositories on the old name (config, state directory, kit lock, `.gitattributes` block, `lm/` branches, `LOCKMASTER_*` landing variables); SR-ARCHITECTURE decision 21; `tests/test_rename.py`. 166 tests pass (Python 3.13, the cloud copy). Edited in a cloud copy and written back: the bridge's shell would not start (the Mac lacks free disk). Not landed from here.
+- **Decided / left open:** `archive/`, this log's past entries, the changelog's released entries and quoted logs (W-175) keep the old name. The folder, the GitHub repo, PyPI and the other four repositories are W-21.
+- **Mistakes:** the first pass rewrote a path inside W-175's quoted git log; restored.
+- **Next:** W-21 step 1 — reinstall the package from the checkout so the hooks find `docketkit`.
+
+## 2026-11-09 — W-20 filed: rulings owed to the decider must reach the inbox  ·  Cowork (Opus 5.5)
+
+- **Asked:** *"We need a work item for lock master so that this never happens again."*, then *"had a work item for lock master to do the research for the previous item as well as this item"* (voice, walking through codelaw's queue).
+- **Done:** `work/open/W-20-decider-rulings-reach-the-inbox.md` and its row under *research*: three codelaw cases (**codelaw W-139**, **codelaw W-174**, **codelaw W-172**), the questions, the records it will touch. Not landed from here: `lockmaster` is not on the bridge's PATH; Arpit runs `lockmaster save` on the Mac.
+- **Decided / left open:** a research item (rule 37a: Cowork); the design is the decider's pick after step 3.
+- **Mistakes:** none.
+- **Next:** W-20 step 1 — read the three cases in codelaw's files.
+
 ## 2026-11-08 — `install` scaffolds the whole work system (W-18)  ·  Cowork (Opus 5.5)
 
 - **Asked:** *"what all things is milo missing like records dir and what else ?"*, then *"All these things should be part of Lock Master as well"* and *"implement what we just talked"* — records, AGENTS.md, the full work/ from the latest lockmaster, milo's docs/ to its root, no CI.

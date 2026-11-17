@@ -4,7 +4,7 @@ without anyone remembering to land it, and what Cowork could not commit,
 Claude Code does.
 
     start  SessionStart      export CLAUDE_SESSION_ID for this session's commands,
-                             so `lockmaster start` records whose change it is;
+                             so `docketkit start` records whose change it is;
                              land waiting handoffs in the background
     edit   PostToolUse       note each file this session writes in main's checkout
     stop   Stop              say what earlier landings did (and, once, a landing
@@ -16,9 +16,9 @@ Claude Code does.
     end    SessionEnd        land and clean up this session's changes, in the
                              background (the session is going away)
 
-lockmaster is found at `$LOCKMASTER_SRC`, in this repository's own `src/`
-(lockmaster itself), as a package this interpreter imports, or in the
-environment of the `lockmaster` command on PATH (`uv tool install lockmaster`,
+docketkit is found at `$DOCKETKIT_SRC`, in this repository's own `src/`
+(docketkit itself), as a package this interpreter imports, or in the
+environment of the `docketkit` command on PATH (`uv tool install docketkit`,
 pipx). A checkout beside the repository is never used: every other repository
 runs the published package (SR-ARCHITECTURE decision 17, W-16). Without it the
 hook does nothing.
@@ -54,7 +54,7 @@ def main_root(cwd):
 
 
 def candidates():
-    env = os.environ.get("LOCKMASTER_SRC")
+    env = os.environ.get("DOCKETKIT_SRC")
     if env:
         yield Path(env)
     yield ROOT / "src"
@@ -64,25 +64,25 @@ def candidates():
 
 
 def command_env():
-    """The site-packages holding the `lockmaster` command's own package: a `uv tool`
+    """The site-packages holding the `docketkit` command's own package: a `uv tool`
     or pipx install lives in an environment this interpreter cannot import."""
-    exe = shutil.which("lockmaster")
+    exe = shutil.which("docketkit")
     if not exe:
         return None
     env = Path(exe).resolve().parent.parent
     for site in sorted(env.glob("lib/python3*/site-packages")) + [env / "Lib" / "site-packages"]:
-        if (site / "lockmaster" / "land.py").is_file():
+        if (site / "docketkit" / "land.py").is_file():
             return str(site)
     return None
 
 
 def find_src():
-    """The directory to put on sys.path, "" when lockmaster is importable, None when absent."""
+    """The directory to put on sys.path, "" when docketkit is importable, None when absent."""
     for c in candidates():
-        if (c / "lockmaster" / "land.py").is_file():
+        if (c / "docketkit" / "land.py").is_file():
             return str(c)
     try:
-        import lockmaster  # noqa: F401
+        import docketkit  # noqa: F401
         return ""
     except ImportError:
         return command_env()
@@ -94,29 +94,29 @@ def load():
         return None, None
     if src:
         sys.path.insert(0, src)
-    from lockmaster import land
-    from lockmaster.repo import Repo
+    from docketkit import land
+    from docketkit.repo import Repo
     return src, (land, Repo)
 
 
 def command(src):
     if not src or src == command_env():
-        return "lockmaster"
-    return "PYTHONPATH={} python3 -m lockmaster".format(src)
+        return "docketkit"
+    return "PYTHONPATH={} python3 -m docketkit".format(src)
 
 
 def detach(src, args, cwd):
-    """Run `lockmaster <args>` on its own, outliving this hook; output to the state dir's log."""
+    """Run `docketkit <args>` on its own, outliving this hook; output to the state dir's log."""
     common = git(["rev-parse", "--git-common-dir"], cwd)
     if not common:
         return
-    log_dir = (Path(cwd) / common).resolve() / "lockmaster"
+    log_dir = (Path(cwd) / common).resolve() / "docketkit"
     log_dir.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ)
     if src:
         env["PYTHONPATH"] = src + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
     with open(str(log_dir / "auto-land.log"), "a", encoding="utf-8") as log:
-        subprocess.Popen([sys.executable, "-m", "lockmaster"] + args, cwd=str(cwd), env=env,
+        subprocess.Popen([sys.executable, "-m", "docketkit"] + args, cwd=str(cwd), env=env,
                          stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
 
 
@@ -184,7 +184,7 @@ def edit(sid, hook):
 def stop(sid, hook):
     """Report what earlier landings did, then land in the background: a
     landing runs the repository's checks and rebuilds, which can take minutes
-    (fux), so a turn never waits on it. `LOCKMASTER_FOREGROUND=1` lands first
+    (fux), so a turn never waits on it. `DOCKETKIT_FOREGROUND=1` lands first
     and reports at once (the tests)."""
     src, mods = load()
     if mods is None:
@@ -201,7 +201,7 @@ def stop(sid, hook):
             print("auto-land.py stop: {}".format(e), file=sys.stderr)
             return None
 
-    foreground = os.environ.get("LOCKMASTER_FOREGROUND") == "1"
+    foreground = os.environ.get("DOCKETKIT_FOREGROUND") == "1"
     if foreground:
         step(lambda: land.sync(Repo(cwd), session=sid, cwd=cwd, out=lines.append))
         step(lambda: land.pickup(Repo(cwd), out=lines.append))
@@ -226,7 +226,7 @@ def stop(sid, hook):
                         "main's checkout; the end of the next turn tries again with them.".format(
                             h["item"], h["reason"]))
     for item, reason in step(lambda: land.held_reports(repo, session=sid, cwd=cwd)) or []:
-        said.append("lockmaster could not land {} at the end of a turn:\n{}\nFix it in its worktree; it "
+        said.append("docketkit could not land {} at the end of a turn:\n{}\nFix it in its worktree; it "
                     "lands at the end of the next turn. Nothing on main changed.".format(item, reason))
     if sid:
         notes["last_stop"] = time.time()
@@ -239,7 +239,7 @@ def stop(sid, hook):
         step(lambda: detach(src, args, cwd))
     result = {}
     if landed:
-        result["systemMessage"] = "lockmaster: " + "; ".join(landed)
+        result["systemMessage"] = "docketkit: " + "; ".join(landed)
     if said:
         if hook.get("stop_hook_active"):
             # Already continuing because of a Stop hook: say it, never block twice in a row.

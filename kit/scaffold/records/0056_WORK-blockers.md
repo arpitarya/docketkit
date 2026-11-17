@@ -81,7 +81,7 @@ that works around one makes the decision it was waiting for.
 7. Three hooks enforce it: `UserPromptSubmit` injects the blocker and the
    inbox into every prompt, each inbox row with its age computed from its
    `filed` date (`inject-inbox.sh`, which reads any `## Blocked on …` heading and
-   computes age only where the queue keeps no `age` column — **lockmaster W-09**); `Stop` refuses to end a turn
+   computes age only where the queue keeps no `age` column — **docketkit W-09**); `Stop` refuses to end a turn
    while a blocker is unsurfaced, three times, then relents
    (`stop-if-blocked.sh`); `PreToolUse` on writes is a **per-asset** lock
    (`session-lock.sh`, TTL 900 s).

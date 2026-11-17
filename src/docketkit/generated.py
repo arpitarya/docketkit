@@ -1,6 +1,6 @@
 """Generated files are never merged, only rebuilt — SR-ARCHITECTURE decision 9.
 
-`lockmaster.toml` `[generated]` maps a path or glob to the command that
+`docketkit.toml` `[generated]` maps a path or glob to the command that
 rebuilds it. `regen` restores each such file to `main`'s version, then runs
 its command; a command that fails fails the run.
 
@@ -11,11 +11,11 @@ nothing is touched until it is committed or put back.
 import subprocess
 from pathlib import Path
 
-from lockmaster import git
-from lockmaster.repo import LockmasterError, matches
+from docketkit import git
+from docketkit.repo import DocketkitError, matches
 
 
-class RegenError(LockmasterError):
+class RegenError(DocketkitError):
     pass
 
 

@@ -1,13 +1,13 @@
-"""W-03 DoD 1 — lockmaster.toml means the same on Python 3.9 and 3.11+;
+"""W-03 DoD 1 — docketkit.toml means the same on Python 3.9 and 3.11+;
 anything outside the subset is a loud error (SR-ARCHITECTURE decision 13)."""
 import sys
 import unittest
 
 import support  # noqa: F401 — puts src/ on the path
 
-from lockmaster import config
+from docketkit import config
 
-GOOD = '''# lockmaster.toml
+GOOD = '''# docketkit.toml
 [main]
 branch = "trunk"
 
@@ -40,7 +40,7 @@ class SubsetReader(unittest.TestCase):
         self.assertEqual(data["checks"]["x"], 'a\tb"c\\ é')
 
     def test_defaults_without_a_file(self):
-        c = config.load("/nonexistent/lockmaster.toml")
+        c = config.load("/nonexistent/docketkit.toml")
         self.assertEqual((c.main, c.checks, c.generated, c.merge), ("main", {}, {}, {}))
 
     def test_outside_the_subset_is_loud(self):

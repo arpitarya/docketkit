@@ -5,7 +5,7 @@ description: "Append-only per-session trail, newest first."
 
 # WORKLOG — the append-only session log
 
-Written by `lockmaster install` (lockmaster's law L10). Every session appends
+Written by `docketkit install` (docketkit's law L10). Every session appends
 **one entry before it ends** — a chat-only session counts. Never edit a past
 entry; newest on top.
 

@@ -27,20 +27,30 @@ entry.**
 *Updated 2026-11-07 (Claude Code, Opus 5.5 — W-10, W-15 built; W-09, W-13, W-14 closed).*
 **Where things stand:** the tool works and lands in all five repositories:
 milo and sheetpane had their first landings on 2026-11-07 (W-09 closed), and
-fux's long-held W-11 handoff landed the same day. `src/lockmaster/` implements
+fux's long-held W-11 handoff landed the same day. `src/docketkit/` implements
 SR-ARCHITECTURE decisions 1–20. Landing is continuous (W-11). **W-10:** a
 landing stopped only by uncommitted edits in main's checkout **waits** and
 lands by itself once they clear; `work/NOW.md` never makes a landing wait.
 **W-15:** `install` creates any of the six work files a repository lacks,
 `doctor` names a missing or stale one, and the kit's `work-files.py` Stop hook
 tells a session once that it touched none of WORKLOG, INTERVIEW or OPEN-WORK.
-L8, L9 and L10 are `built: yes`. **W-16:** every repository but lockmaster runs
-the installed `lockmaster` command (`uv tool install`), never the checkout
+L8, L9 and L10 are `built: yes`. **W-16:** every repository but docketkit runs
+the installed command (still `lockmaster` until W-21 publishes `docketkit`) (`uv tool install`), never the checkout
 beside it. **W-18 (2026-11-08):** `install` also scaffolds the rest of the work system — `kit/scaffold/` (records, AGENTS.md, the rest of `work/`, the scripts) — where a repository lacks it; it reaches the others with the next release. 154 scratch-repo tests pass on Python 3.9.
 **On PyPI:** 0.0.1 (the decider's upload, before W-16), 0.0.2 (W-16) and
-0.0.3 (W-18); the `lockmaster` command every repository runs is 0.0.3 from PyPI.
+0.0.3 (W-18); the command every repository runs is `lockmaster` 0.0.3 from PyPI —
+`docketkit` is not on PyPI yet (W-21).
 
 ## 2 · In flight, and the immediate next step
+
+*Updated 2026-11-17 (Cowork, Opus 5.5 — the rename).* **lockmaster is now
+docketkit** (the decider's ruling; SR-ARCHITECTURE decision 21): package, module,
+command (`docketkit`, and `dk`), branches `dk/<item>`, the `Docketkit-Change`
+trailer, `docketkit.toml`, `.git/docketkit/`, `.claude/docketkit.lock`; the kit's
+`docket` skill is `inbox-review`. A repository set up under the old name keeps
+working and is moved over by the new code (`tests/test_rename.py`); history
+keeps the old name. 166 tests pass. **Next: W-21** — the rename reaches PyPI,
+GitHub and the other four repositories; until then they run `lockmaster` 0.0.3.
 
 *Updated 2026-11-09 (Claude Code, Opus 5.5 — W-19, CI green).* CI passes on
 Linux, macOS and Windows under 3.9 and 3.13 (it had failed on every push since
@@ -65,8 +75,8 @@ names: the decider rules (SR-WORK-CLEANUP decision 3).
   for the project, every GB past it approved first).
 - Python ≥ 3.9, standard library only (SR-ARCHITECTURE decision 2): the
   decider's Mac runs `python3` 3.9.
-- Edit `kit/`, never `.claude/` or `.github/` directly: `lockmaster install .`
-  overwrites them and `lockmaster doctor` reports a hand edit (`CLAUDE.md` §Layout).
+- Edit `kit/`, never `.claude/` or `.github/` directly: `docketkit install .`
+  overwrites them and `docketkit doctor` reports a hand edit (`CLAUDE.md` §Layout).
 - Nothing in `src/` or `kit/claude/` may contain the forbidden git strings, not
   even in a comment: CI greps for them, and so does `tests/test_regen.py`.
 - `main`'s first-parent chain is the landings; when a whole branch lands its
@@ -76,11 +86,11 @@ names: the decider rules (SR-WORK-CLEANUP decision 3).
   unlink, and it sees the Mac's repositories at another path, so a prune from
   it would cut off the Mac's worktrees. Its shell can write `.claude/` and
   `.git/` (its file tools cannot); git there runs with no optional locks.
-  Edits from Cowork land through `lockmaster save` → a handoff.
+  Edits from Cowork land through `docketkit save` → a handoff.
 
 ## 4 · Lessons learned
 
-- 2026-10-28: anything lockmaster writes that names a path names the machine
+- 2026-10-28: anything docketkit writes that names a path names the machine
   that wrote it — the merge drivers were registered with the bridge's paths
   twice. `work/LESSONS.md` has it; decision 10 now heals it.
 - 2026-10-28: an independent review of W-11 before it landed found eight
@@ -92,7 +102,7 @@ names: the decider rules (SR-WORK-CLEANUP decision 3).
   work-system check refused it. Landing through the repo's real checks finds
   what unit tests on scratch repos cannot.
 
-- lockmaster exists because of lessons fux, sheetpane and codelaw each
+- docketkit exists because of lessons fux, sheetpane and codelaw each
   recorded: a commit swept another session's staged files; generated files
   conflicted; seven parallel builds filled the disk; a ruling sat on an
   unmerged branch for days. SR-ARCHITECTURE §2 Context names them.

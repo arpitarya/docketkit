@@ -2,8 +2,8 @@
 type: Standing Record
 kind: law
 name: SR-LAW-8
-title: "SR-LAW-8 (0010) — L8 — lockmaster handles parallel requests"
-description: "Any number of sessions may call lockmaster at the same moment; every request is served or queued, never lost, never refused for being concurrent, never left for a person to untangle"
+title: "SR-LAW-8 (0010) — L8 — docketkit handles parallel requests"
+description: "Any number of sessions may call docketkit at the same moment; every request is served or queued, never lost, never refused for being concurrent, never left for a person to untangle"
 status: accepted
 date: 2026-11-05
 feature: "parallel requests as a law"
@@ -14,21 +14,21 @@ content_sha: ""
 ratifies: "Arpit, 2026-11-05 (Cowork): 'create 2 SR law — 1. lock master should handle parallel requests'"
 ---
 
-# SR-LAW-8 — L8 — lockmaster handles parallel requests
+# SR-LAW-8 — L8 — docketkit handles parallel requests
 
 ## §1 — For humans
 
 **The law (L8).**
 
-> **Any number of sessions may call lockmaster at the same moment.** Every request is served or queued — never lost, never refused because another request is running, never left for a person to untangle. Landings stay one at a time; the waiting is lockmaster's, not the caller's.
+> **Any number of sessions may call docketkit at the same moment.** Every request is served or queued — never lost, never refused because another request is running, never left for a person to untangle. Landings stay one at a time; the waiting is docketkit's, not the caller's.
 
 **Ruled by Arpit, 2026-11-05 (Cowork):** *"lock master should handle parallel requests."*
 
-**Why it exists.** lockmaster exists because many agents work in one repository at once. A lander that only works when callers take turns solves nothing.
+**Why it exists.** docketkit exists because many agents work in one repository at once. A lander that only works when callers take turns solves nothing.
 
 ```mermaid
 flowchart LR
-    A1["session A"] --> Q["lockmaster: queue"]
+    A1["session A"] --> Q["docketkit: queue"]
     A2["session B"] --> Q
     A3["session C"] --> Q
     Q -->|one at a time| M["main"]
@@ -39,7 +39,7 @@ flowchart LR
 
 ```text
    session A --\
-   session B ----> lockmaster: queue --one at a time--> main
+   session B ----> docketkit: queue --one at a time--> main
    session C --/
 ```
 
@@ -55,11 +55,11 @@ Every-turn landing (SR-ARCHITECTURE decision 20) and Cowork handoffs (decision 1
 
 ### Decision
 
-1. **Any command, any number of callers.** Every `lockmaster` command may run at the same time as any other, from any number of sessions, worktrees and surfaces in one repository.
-2. **No request is lost.** A request lockmaster accepted ends landed, held, red with a reason, or still queued — never silently dropped. Two submits at the same instant both land.
+1. **Any command, any number of callers.** Every `docketkit` command may run at the same time as any other, from any number of sessions, worktrees and surfaces in one repository.
+2. **No request is lost.** A request docketkit accepted ends landed, held, red with a reason, or still queued — never silently dropped. Two submits at the same instant both land.
 3. **No request is refused for being concurrent.** A busy lander means *queued*, not an error: the caller exits successfully and is never told to retry.
-4. **State is never torn.** Every write to lockmaster's state is written aside and renamed in; no reader sees half a file. A lock whose holder died is taken over, and the change it left mid-landing is queued again.
-5. **Contention on `main` is lockmaster's to resolve.** A change never goes red only because another landing went first; it is redone on the new `main`.
+4. **State is never torn.** Every write to docketkit's state is written aside and renamed in; no reader sees half a file. A lock whose holder died is taken over, and the change it left mid-landing is queued again.
+5. **Contention on `main` is docketkit's to resolve.** A change never goes red only because another landing went first; it is redone on the new `main`.
 6. **Parallel work never crosses.** One request's edits never land under another's change (only claimed paths land; L3 holds).
 7. **Parallel requests, serial landings.** This law does not require two landings at once; one lander at a time stays (SR-ARCHITECTURE decision 7).
 
@@ -76,7 +76,7 @@ Every-turn landing (SR-ARCHITECTURE decision 20) and Cowork handoffs (decision 1
 
 ### Reference (required)
 
-- [`src/lockmaster/repo.py`](../src/lockmaster/repo.py) — the land lock and the atomic state write.
+- [`src/docketkit/repo.py`](../src/docketkit/repo.py) — the land lock and the atomic state write.
 - [`tests/test_parallel.py`](../tests/test_parallel.py) — several processes at once.
 - [`tests/test_land.py`](../tests/test_land.py) — `test_a_second_lander_waits_its_turn`.
 
@@ -94,8 +94,8 @@ Every-turn landing (SR-ARCHITECTURE decision 20) and Cowork handoffs (decision 1
 
 **Code**
 
-- [`src/lockmaster/repo.py`](../src/lockmaster/repo.py)
-- [`src/lockmaster/land.py`](../src/lockmaster/land.py)
+- [`src/docketkit/repo.py`](../src/docketkit/repo.py)
+- [`src/docketkit/land.py`](../src/docketkit/land.py)
 - [`tests/test_land.py`](../tests/test_land.py)
 - [`tests/test_parallel.py`](../tests/test_parallel.py)
 

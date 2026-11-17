@@ -1,6 +1,6 @@
-# Contributing to lockmaster
+# Contributing to docketkit
 
-Thanks for helping. lockmaster is at the design stage: the most useful
+Thanks for helping. docketkit is at the design stage: the most useful
 contribution today is **a collision you have seen** between agents or people
 sharing one repository — what happened, and what was lost or nearly lost.
 
@@ -9,7 +9,7 @@ sharing one repository — what happened, and what was lost or nearly lost.
 | you have | do this |
 |---|---|
 | A collision story | Open an issue: what each side did, the git commands, what went wrong |
-| A bug | Open an issue with `python3 -m lockmaster --version`, the command and the repo state |
+| A bug | Open an issue with `python3 -m docketkit --version`, the command and the repo state |
 | A fix of your own | Open a pull request (below) |
 | A security issue | Don't open a public issue. See [SECURITY.md](SECURITY.md) |
 
@@ -18,9 +18,9 @@ sharing one repository — what happened, and what was lost or nearly lost.
 Python 3.9 or newer, nothing else.
 
 ```bash
-git clone https://github.com/arpitarya/lockmaster.git
-cd lockmaster
-PYTHONPATH=src python3 -m lockmaster install .
+git clone https://github.com/arpitarya/docketkit.git
+cd docketkit
+PYTHONPATH=src python3 -m docketkit install .
 python3 -m unittest discover tests
 python3 scripts/check-work-system.py
 ```
@@ -31,9 +31,9 @@ Only a tag publishes; [`.github/workflows/release.yml`](.github/workflows/releas
 does the rest (SR-ARCHITECTURE decision 17).
 
 ```bash
-python3 scripts/release.py prepare 0.1.0    # bumps lockmaster.__version__, cuts CHANGELOG's [Unreleased]
-git commit -am "lockmaster 0.1.0"           # the decider, by hand — agents land through lockmaster
-git tag -a v0.1.0 -m "lockmaster 0.1.0"
+python3 scripts/release.py prepare 0.1.0    # bumps docketkit.__version__, cuts CHANGELOG's [Unreleased]
+git commit -am "docketkit 0.1.0"           # the decider, by hand — agents land through docketkit
+git tag -a v0.1.0 -m "docketkit 0.1.0"
 git push origin main v0.1.0                 # test · lint · build · verify · TestPyPI · PyPI · GitHub release
 ```
 
@@ -45,8 +45,8 @@ publishing, so no token is stored anywhere:
 
 1. On [pypi.org](https://pypi.org/manage/account/publishing/) and
    [test.pypi.org](https://test.pypi.org/manage/account/publishing/), add a
-   pending trusted publisher: project `lockmaster`, owner `arpitarya`,
-   repository `lockmaster`, workflow `release.yml`, environment `pypi`
+   pending trusted publisher: project `docketkit`, owner `arpitarya`,
+   repository `docketkit`, workflow `release.yml`, environment `pypi`
    (on TestPyPI: `testpypi`).
 2. In the GitHub repository's Settings → Environments, create `testpypi` and
    `pypi`; give `pypi` a required reviewer and limit both to tags `v*`.

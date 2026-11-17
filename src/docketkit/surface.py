@@ -9,18 +9,18 @@ prunes the ones whose paths are gone. Two surfaces cannot do that safely:
   repository under another path): the host's worktrees look missing from
   here, so a `git worktree prune` here would cut them off.
 
-On such a surface lockmaster commits nothing: `lockmaster save` hands the
+On such a surface docketkit commits nothing: `docketkit save` hands the
 edits to the next surface that can (`handoff`, `pickup` in land.py).
 
 `home` is the primary checkout's path on the surface that commits, kept at
-`<git-common-dir>/lockmaster/home`. When it is not yet written, it is read off
-the worktree paths of lockmaster's own changes.
+`<git-common-dir>/docketkit/home`. When it is not yet written, it is read off
+the worktree paths of docketkit's own changes.
 """
 import os
 from pathlib import Path
 
-from lockmaster import git
-from lockmaster.repo import WORKTREES_DIR
+from docketkit import git
+from docketkit.repo import WORKTREES_DIR
 
 PROBE = "probe"
 HOME = "home"
@@ -33,7 +33,7 @@ def can_unlink(repo):
     repo.state.mkdir(parents=True, exist_ok=True)
     probe = repo.state / PROBE
     try:
-        probe.write_text("lockmaster probe\n", encoding="utf-8")
+        probe.write_text("docketkit probe\n", encoding="utf-8")
     except OSError:
         return False
     try:
@@ -44,7 +44,7 @@ def can_unlink(repo):
 
 
 def recorded_home(repo):
-    """The primary checkout's path where lockmaster committed, or None."""
+    """The primary checkout's path where docketkit committed, or None."""
     try:
         text = (repo.state / HOME).read_text(encoding="utf-8").strip()
         if text:

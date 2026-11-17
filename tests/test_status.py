@@ -1,4 +1,4 @@
-"""W-07 — `lockmaster status`, and work/NOW.md as its generated view
+"""W-07 — `docketkit status`, and work/NOW.md as its generated view
 (SR-ARCHITECTURE decision 14, SR-WORK-NOW decisions 2-5)."""
 import importlib.util
 import io
@@ -11,7 +11,7 @@ from pathlib import Path
 
 from support import ROOT, ScratchCase, git
 
-from lockmaster import land, now
+from docketkit import land, now
 
 NOW_MD = """---
 type: Pointer

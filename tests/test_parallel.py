@@ -9,8 +9,8 @@ from pathlib import Path
 
 from support import SRC, ScratchCase, git
 
-from lockmaster import land
-from lockmaster.repo import LANDED, LandLock
+from docketkit import land
+from docketkit.repo import LANDED, LandLock
 
 N = 6
 
@@ -18,8 +18,8 @@ WORKER = textwrap.dedent("""
     import sys, time
     sys.path.insert(0, {src!r})
     from pathlib import Path
-    from lockmaster import land
-    from lockmaster.repo import Repo
+    from docketkit import land
+    from docketkit.repo import Repo
     root, kind, name, go = sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4])
     while time.time() < go:  # every worker starts at the same instant
         time.sleep(0.001)

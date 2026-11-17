@@ -2,8 +2,8 @@
 type: Standing Record
 kind: component
 name: SR-ARCHITECTURE
-title: "SR-ARCHITECTURE (0101) — lockmaster lands agent changes into main one at a time, on plain git"
-description: "lockmaster is a small command-line tool over plain git: an agent claims the paths it will touch, works in a throwaway worktree, and submits; lockmaster lands each change onto main one at a time — only the claimed paths, generated files rebuilt, the repo's checks run, a fast-forward commit — then removes the worktree. Nothing is ever forced; what cannot land cleanly goes red, to the decider."
+title: "SR-ARCHITECTURE (0101) — docketkit lands agent changes into main one at a time, on plain git"
+description: "docketkit is a small command-line tool over plain git: an agent claims the paths it will touch, works in a throwaway worktree, and submits; docketkit lands each change onto main one at a time — only the claimed paths, generated files rebuilt, the repo's checks run, a fast-forward commit — then removes the worktree. Nothing is ever forced; what cannot land cleanly goes red, to the decider."
 status: accepted
 date: 2026-10-25
 feature: "the lander — claims, the queue, landing, generated files, structural merges, the kit"
@@ -12,7 +12,7 @@ owns:
   - src
   - tests
   - pyproject.toml
-  - lockmaster.toml
+  - docketkit.toml
   - .claude/hooks/claim-guard.py
   - .claude/hooks/block-main.py
   - .claude/hooks/auto-land.py
@@ -22,16 +22,16 @@ owns:
 laws: [L0, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10]
 timestamp: 2026-10-25T13:00:00Z
 content_sha: ""
-ratifies: "Arpit, 2026-10-25 (Cowork): after the land proposal and the name search — 'Let's call it a lockmaster … Now create a document. Now go to GitHub and create me a new repository for this.' → 'Here is the lock master repo. Add the necessary documents, add whatever is needed for the tool to be built out.' → on W-02's three forks: 'All the blockers, I accept whatever is said over there.' → 'I want this to be Python only project. I don't believe we need npm.'"
+ratifies: "Arpit, 2026-10-25 (Cowork): after the land proposal and the name search — 'Let's call it a docketkit … Now create a document. Now go to GitHub and create me a new repository for this.' → 'Here is the lock master repo. Add the necessary documents, add whatever is needed for the tool to be built out.' → on W-02's three forks: 'All the blockers, I accept whatever is said over there.' → 'I want this to be Python only project. I don't believe we need npm.'"
 ---
 
-# SR-ARCHITECTURE — lockmaster lands agent changes into main, one at a time
+# SR-ARCHITECTURE — docketkit lands agent changes into main, one at a time
 
 ## §1 — For humans
 
-**lockmaster is a doorman for `main`.** Agents never commit to `main`
+**docketkit is a doorman for `main`.** Agents never commit to `main`
 themselves. Each one says which files it will touch, works in its own
-throwaway folder, and hands its change in. lockmaster puts the changes onto
+throwaway folder, and hands its change in. docketkit puts the changes onto
 `main` **one at a time** — like a canal lock-keeper letting one boat through —
 and cleans up after each.
 
@@ -44,9 +44,9 @@ cleanly — a real conflict, a failed check, a file that would be lost — stops
 
 ```mermaid
 flowchart LR
-    S["lockmaster start W-nn --paths …<br/>branch + worktree + claim"] --> W["agent edits<br/>claimed paths only"]
-    W --> U["lockmaster submit<br/>joins the queue"]
-    U --> R{"lockmaster run<br/>one change at a time"}
+    S["docketkit start W-nn --paths …<br/>branch + worktree + claim"] --> W["agent edits<br/>claimed paths only"]
+    W --> U["docketkit submit<br/>joins the queue"]
+    U --> R{"docketkit run<br/>one change at a time"}
     R -->|clean| L["claimed paths onto latest main<br/>generated files rebuilt<br/>checks pass<br/>fast-forward commit"]
     L --> C["worktree + branch removed"]
     R -->|conflict / check fails| X["red → the agent, then the decider's inbox"]
@@ -89,35 +89,35 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
 
 1. **A command-line tool over plain git, not a version control system.** Every
    landing is an ordinary commit on `main`; history, blame and diff are git's.
-   No lockmaster state is needed to read the repository.
+   No docketkit state is needed to read the repository.
 2. **Python ≥ 3.9, standard library only** ([SR-LAW-4](0006_LAW-4-zero-dependencies.md)). 3.9 is the `python3` on the
    decider's Mac ([`work/MACHINE.md`](../work/MACHINE.md)); the tool and every
-   hook run there unchanged. Code lives in `src/lockmaster/`; the command is
-   `lockmaster` (`python3 -m lockmaster` works without installing).
+   hook run there unchanged. Code lives in `src/docketkit/`; the command is
+   `docketkit` (`python3 -m docketkit` works without installing).
 3. **Its state lives inside git's own directory**, at
-   `$(git rev-parse --git-common-dir)/lockmaster/` — shared by every worktree,
+   `$(git rev-parse --git-common-dir)/docketkit/` — shared by every worktree,
    never committed, gone with the clone. A change is one JSON file in
    `changes/`; the land lock and the throwaway landing worktrees live there too.
 
 **A change**
 
 4. **A change is a claim:** a work-item id, the paths it may touch (a file, a
-   directory above it, or a glob), a branch `lm/<item>` and a worktree at
+   directory above it, or a glob), a branch `dk/<item>` and a worktree at
    `.claude/worktrees/<item>`, kept out of the main checkout's status through
-   `info/exclude`. `lockmaster start` creates all three;
-   `lockmaster claim add <path>` widens the claim.
+   `info/exclude`. `docketkit start` creates all three;
+   `docketkit claim add <path>` widens the claim.
 5. **Only claimed paths land.** Anything else the branch changed, committed or
    not, is left behind and reported, never swept in. `submit` commits only the
    claimed paths in the worktree. A kit hook (`claim-guard.py`) warns — never
    refuses — when an agent writes inside a change's worktree outside its claim.
-6. **`lockmaster submit` queues the change and starts `lockmaster run`
+6. **`docketkit submit` queues the change and starts `docketkit run`
    when no lander holds the land lock;** a lander already running picks the
    change up. Nobody has to remember to land; the lock still keeps it to one
    at a time (ruled 2026-10-25, W-02).
 
 **Landing**
 
-7. **One lander at a time.** `lockmaster run` takes the repo's land lock (a
+7. **One lander at a time.** `docketkit run` takes the repo's land lock (a
    `mkdir` mutex in the state directory, holding the lander's pid) and lands
    queued changes oldest first. A second lander exits and leaves the queue to
    the first. A lock whose pid is dead is stale and taken over; a change it
@@ -126,7 +126,7 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
    merge base, generated files excluded, as one commit; cherry-pick it onto the
    latest `main` in a fresh worktree in the state directory; rebuild every
    generated file (decision 9); run the repo's checks; commit — the repo's own
-   commit hooks run — with the item id in a `Lockmaster-Change:` trailer;
+   commit hooks run — with the item id in a `Docketkit-Change:` trailer;
    fast-forward `main`. **When the whole branch landed**, the landing commit
    also records the branch tip as a second parent, so git itself can prove the
    branch merged and `git branch -d` removes it ([SR-LAW-3](0005_LAW-3-never-lose-work.md)
@@ -139,7 +139,7 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
    be is kept and reported. A failed attempt's landing worktree is committed
    to its own detached HEAD before it is removed.
 8a. **Edits in `main`'s checkout that are the landing's own do not stop it**
-   (2026-10-28, W-11). Before the fast-forward, lockmaster compares each
+   (2026-10-28, W-11). Before the fast-forward, docketkit compares each
    uncommitted path in `main`'s checkout that the landing changes with the
    landing's version. When every one is byte-for-byte the same — edits made in
    the checkout and landed by `save` (decision 19), or a Cowork edit another
@@ -153,25 +153,25 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
    replaced, its parents, author and message kept. `save` once blocked itself
    this way: its worktree's row was written after its copy was taken.
 9. **Generated files are never merged, only rebuilt.** Each repo lists them,
-   with the command that rebuilds each, in `lockmaster.toml` `[generated]`.
+   with the command that rebuilds each, in `docketkit.toml` `[generated]`.
    Rebuilding restores each to `main`'s version first — unless it has
    uncommitted edits, which are refused by name, never overwritten — then runs
-   its command; a failing command fails the landing. `lockmaster regen` does
+   its command; a failing command fails the landing. `docketkit regen` does
    the same by hand.
 10. **Hand-written files with a known shape merge structurally** —
     `append-newest-first` (a worklog), `table-rows` (a queue), `append` (a
-    lessons file) — as git merge drivers `lockmaster drivers` registers in
+    lessons file) — as git merge drivers `docketkit drivers` registers in
     `.git/config`, with `[merge]`'s paths written into a block of
-    `.gitattributes` lockmaster owns. When both sides only inserted lines at
+    `.gitattributes` docketkit owns. When both sides only inserted lines at
     the same place, both insertions are kept: the landing change's on top for
     `append-newest-first`, in landing order otherwise, and a row both sides
     added kept once for `table-rows`. Anything else goes to `git merge-file`,
     so a true conflict still conflicts. Plain `git merge` uses them too.
     **A driver names the machine that registered it** — its interpreter and
-    `merge.py` paths — so it is registered only where lockmaster commits
+    `merge.py` paths — so it is registered only where docketkit commits
     (2026-10-28, W-11; registered from the Cowork bridge, twice, it named the
     bridge's paths): `install` on a surface that cannot commit (decision 19)
-    writes `.gitattributes` and registers nothing, every `lockmaster run`
+    writes `.gitattributes` and registers nothing, every `docketkit run`
     re-points a driver whose interpreter or `merge.py` is missing on this
     machine, and `doctor` names one.
 11. **Red, never forced.** A conflict outside a structural merge, a failed
@@ -179,18 +179,18 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     stop that change: it is marked red
     with the reason, and the agent is told — with the inbox row
     ([SR-WORK-OPEN-QUEUE](0051_WORK-open-queue.md) rule 42's shape) ready to
-    add if it cannot fix it. lockmaster never forces, deletes an unmerged
+    add if it cannot fix it. docketkit never forces, deletes an unmerged
     branch, hard-resets, cleans or force-pushes
     ([SR-LAW-3](0005_LAW-3-never-lose-work.md) decision 3). **A red change is
     set aside and the next queued change lands** (ruled 2026-10-25, W-02): one
-    bad change does not hold up the rest. It stays in `lockmaster queue`,
+    bad change does not hold up the rest. It stays in `docketkit queue`,
     marked red with its reason, until it is fixed and resubmitted or abandoned.
     An auto-landing (decision 20) that cannot land is **held**, not red.
     **Uncommitted edits in `main`'s checkout that the fast-forward would
     overwrite are not red either: the change is waiting** (2026-11-07, W-10;
     [SR-LAW-9](0011_LAW-9-cowork-and-claude-code-together.md) decision 4).
     The landing commit — rebuilt, checked and committed — is kept under
-    `refs/lockmaster/waiting/<item>`; every `lockmaster run` (and so every
+    `refs/docketkit/waiting/<item>`; every `docketkit run` (and so every
     `submit`, `save`, `pickup` and end-of-turn `sync`) looks again and, once
     those edits are committed, handed off or undone, fast-forwards it with no
     resubmit and no second run of the checks. If `main` moved meanwhile, the
@@ -198,12 +198,12 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     a stale base. A change queued behind a waiting one still lands. A kept
     landing waits the same way and stays open once it lands; `SessionEnd`
     finishes it instead. The checkout's edits are never touched
-    ([SR-LAW-3](0005_LAW-3-never-lose-work.md)). `lockmaster status` and
+    ([SR-LAW-3](0005_LAW-3-never-lose-work.md)). `docketkit status` and
     `doctor` name each uncommitted path in the checkout that a queued, waiting
     or open change claims, with the change, before it lands; the kit's
     `claim-guard.py` warns a session that edits such a path there. A session
     with no hooks (Cowork) sees only `status`, `doctor` and `queue`.
-12. **Only lockmaster writes to `main`.** A kit hook (`block-main.py`) refuses
+12. **Only docketkit writes to `main`.** A kit hook (`block-main.py`) refuses
     an agent's `git commit`, `merge`, `cherry-pick`, `revert`, `am` or `rebase`
     while `main` is checked out. **A plain push of `main` passes** (ruled
     2026-10-26): every option on the hook's allow-list and no refspec that
@@ -212,19 +212,19 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     option included. A heredoc's body is input, not commands, and is not judged.
     On Windows a backslash in the command is a path's, not an escape
     (2026-11-09, W-19: `git -C C:\…` was read as `C:…` and passed).
-    lockmaster's own landing runs git inside `lockmaster`, not through the
+    docketkit's own landing runs git inside `docketkit`, not through the
     agent's shell tool, so it passes. The hook binds agent sessions only: the
     decider's own terminal can still commit to `main`.
 
 **Configuration**
 
-13. **`lockmaster.toml` at the repo root** — `[main]` (the branch), `[checks]`
+13. **`docketkit.toml` at the repo root** — `[main]` (the branch), `[checks]`
     (name → command, run in the platform's shell — `cmd.exe` on Windows; each
     must pass), `[generated]` (path or glob → rebuild
     command), `[merge]` (path or glob → structural driver), and an optional
     `[land]` whose only key, `auto`, is `"on"` (the default) or `"off"`
     (decision 20). Five tables of string values, nothing else; anything outside that subset is a loud error.
-    It is read with `tomllib` on Python ≥ 3.11, checked against lockmaster's
+    It is read with `tomllib` on Python ≥ 3.11, checked against docketkit's
     own reader of the same subset — the reader used on 3.9–3.10 — so a file
     means the same on every Python and no dependency is added.
 
@@ -232,44 +232,44 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
 
 14. | command | who | what it does |
     |---|---|---|
-    | `lockmaster start <item> --paths …` | agent | branch + worktree + claim |
-    | `lockmaster claim add <path>` | agent | widen the claim |
-    | `lockmaster submit` | agent | join the queue |
-    | `lockmaster run` | `submit`, a hook, or anyone | land queued changes, one at a time |
-    | `lockmaster queue` | the decider | what is waiting, landed or red |
-    | `lockmaster status` | anyone | live sessions, changes, worktrees, disk use against L2's budget; `--now` prints `work/NOW.md` as it should be, `--write-now` writes it |
-    | `lockmaster abandon` | agent or the decider | drop a change; remove its worktree and branch only if nothing is lost |
-    | `lockmaster save -m … <path>…` | Cowork, or any session that edited `main`'s checkout | land those edits, or hand them off where this surface cannot commit (decision 19) |
-    | `lockmaster pickup` | the kit's hook, or anyone | land the handoffs (decision 19) |
-    | `lockmaster sync` | the kit's hook | land a session's open changes now (decision 20) |
-    | `lockmaster can-commit` | anyone | whether this surface can commit (exit 0) or hands off (exit 1) |
-    | `lockmaster doctor` | anyone | stale locks, orphan worktrees, unmerged branches, an installed kit that is not this lockmaster's, a waiting change and the checkout edits a change's landing would wait on |
-    | `lockmaster install <repo>` | the decider | install a pinned kit into a repository; create any of the six work files it lacks |
-    | `lockmaster regen` | anyone | rebuild the `[generated]` files by hand |
-    | `lockmaster drivers` | the decider | register the merge drivers; write `[merge]` into `.gitattributes` |
+    | `docketkit start <item> --paths …` | agent | branch + worktree + claim |
+    | `docketkit claim add <path>` | agent | widen the claim |
+    | `docketkit submit` | agent | join the queue |
+    | `docketkit run` | `submit`, a hook, or anyone | land queued changes, one at a time |
+    | `docketkit queue` | the decider | what is waiting, landed or red |
+    | `docketkit status` | anyone | live sessions, changes, worktrees, disk use against L2's budget; `--now` prints `work/NOW.md` as it should be, `--write-now` writes it |
+    | `docketkit abandon` | agent or the decider | drop a change; remove its worktree and branch only if nothing is lost |
+    | `docketkit save -m … <path>…` | Cowork, or any session that edited `main`'s checkout | land those edits, or hand them off where this surface cannot commit (decision 19) |
+    | `docketkit pickup` | the kit's hook, or anyone | land the handoffs (decision 19) |
+    | `docketkit sync` | the kit's hook | land a session's open changes now (decision 20) |
+    | `docketkit can-commit` | anyone | whether this surface can commit (exit 0) or hands off (exit 1) |
+    | `docketkit doctor` | anyone | stale locks, orphan worktrees, unmerged branches, an installed kit that is not this docketkit's, a waiting change and the checkout edits a change's landing would wait on |
+    | `docketkit install <repo>` | the decider | install a pinned kit into a repository; create any of the six work files it lacks |
+    | `docketkit regen` | anyone | rebuild the `[generated]` files by hand |
+    | `docketkit drivers` | the decider | register the merge drivers; write `[merge]` into `.gitattributes` |
 
-    **`work/NOW.md` is `lockmaster status --now`'s view:** its sessions are the
+    **`work/NOW.md` is `docketkit status --now`'s view:** its sessions are the
     sessions' own (the kit's `now-ledger.py` adds and closes them, a Cowork
     session by hand); a resource row whose path is gone leaves; the file is
     written in one shape by every landing and by `now-ledger.py`, which writes
-    through lockmaster's renderer when lockmaster is importable.
+    through docketkit's renderer when docketkit is importable.
 
 **The kit**
 
-15. **`kit/` is what lockmaster installs into a repository:** `kit/claude/`
-    (the hooks, their `settings.json`, the `docket` skill) becomes the target's
+15. **`kit/` is what docketkit installs into a repository:** `kit/claude/`
+    (the hooks, their `settings.json`, the `inbox-review` skill) becomes the target's
     `.claude/`, and `kit/github/` (none today) its `.github/` — a repository's
     CI is its own (decision 16; amended 2026-10-25, W-09: the kit carried
-    lockmaster's own `ci.yml`, which would have replaced the target's). One source, installed —
-    never three hand-copied versions. `lockmaster install` copies it, merges
+    docketkit's own `ci.yml`, which would have replaced the target's). One source, installed —
+    never three hand-copied versions. `docketkit install` copies it, merges
     the kit's hook entries into the target's `settings.json` (the target's own
     entries and keys kept), and records the version, the kit's digest and every
-    installed file's hash in `.claude/lockmaster.lock`, which `doctor` checks.
+    installed file's hash in `.claude/docketkit.lock`, which `doctor` checks.
     A file the kit would replace that no earlier install wrote stops the
     install by name, or with `--backup` is moved aside first. This repository
     installs its own kit the same way; `scripts/bootstrap.py` is retired
     (2026-10-25, W-06). The kit's hooks read any repository's inbox heading and
-    name no law number (2026-10-26, W-09); the `docket` skill names no queue
+    name no law number (2026-10-26, W-09); the `inbox-review` skill names no queue
     group, and walks the groups each queue lists (2026-11-08, W-15: codelaw
     had edited its copy to add its own; `tests/test_kit_hooks.py` fails on a
     kit skill that lists the queue's groups). **`kit/work/` holds a short template
@@ -284,9 +284,9 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     (2026-11-08, W-18): `AGENTS.md`, `docs/GLOSSARY.md`, the generic records
     (the register, `TEMPLATE.md`, `RULE-SINCE`, SR-LAWS, SR-LAW-0 to SR-LAW-2,
     the WORK records and SR-WORK-LANDING, which owns the four landing hooks in
-    a repository that is not lockmaster), `work/README.md`, `NOW.md`,
+    a repository that is not docketkit), `work/README.md`, `NOW.md`,
     `BLOCKED.json`, `IMPLEMENTATION.md` and the `open/`, `compare/` and
-    `proposals/` indexes, `archive/README.md` (kept as `_archive/`, so lockmaster's own
+    `proposals/` indexes, `archive/README.md` (kept as `_archive/`, so docketkit's own
     one-archive check does not read it as a second archive), and the work system's three
     scripts. `install` writes each file the target lacks at the same path and
     never touches one that exists; `records/` and `scripts/` only when the
@@ -298,12 +298,12 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     own `check-work-system.py`, `check-open-work-inbox.py`, `doctor` and commit
     guard over the result.
 16. **What stays in each repository:** its records, work items, backlog,
-    worklog, lessons — the project's own papers — its CI, and its `lockmaster.toml`.
+    worklog, lessons — the project's own papers — its CI, and its `docketkit.toml`.
 
 **Distribution**
 
 17. **Python only, on PyPI only** ([SR-LAW-6](0008_LAW-6-python-only.md)):
-    one package, `lockmaster`; no npm package. **The repository stays private
+    one package, `docketkit`; no npm package. **The repository stays private
     until 0.1.0** — public once the core loop works (ruled 2026-10-25, W-02);
     a placeholder 0.0.1 on PyPI holds the name before then (W-08). **Until
     the trusted publishers and the GitHub environments exist, a release is
@@ -312,21 +312,21 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     environment exists, so a tag cannot publish); the release is tagged, and
     its tag pushed only once they exist — a pushed tag starts the pipeline,
     which cannot publish yet. Once they exist (W-17), only a tag publishes.
-    **Every repository but lockmaster runs the published package** (ruled
+    **Every repository but docketkit runs the published package** (ruled
     2026-11-08, W-16: *"from here on we publish the package then have all
-    consumer consume it"*): `uv tool install lockmaster` (or pipx) once per
-    machine; `lockmaster install .` and `lockmaster drivers` run from that
+    consumer consume it"*): `uv tool install docketkit` (or pipx) once per
+    machine; `docketkit install .` and `docketkit drivers` run from that
     command, so the kit and the merge drivers come from the release. The
-    kit's hooks find lockmaster at `$LOCKMASTER_SRC`, in the repository's own
-    `src/` (lockmaster itself), as an importable package, or in the
-    `lockmaster` command's own environment — never in a checkout beside the
-    repository; a change to lockmaster reaches another repository only by a
+    kit's hooks find docketkit at `$DOCKETKIT_SRC`, in the repository's own
+    `src/` (docketkit itself), as an importable package, or in the
+    `docketkit` command's own environment — never in a checkout beside the
+    repository; a change to docketkit reaches another repository only by a
     release.
     **A release is a tag `v<version>`, and only a tag publishes.**
-    `.github/workflows/release.yml` — lockmaster's own, never in `kit/` —
+    `.github/workflows/release.yml` — docketkit's own, never in `kit/` —
     runs the tests on Linux (`ubuntu-24.04`: Python 3.9 has no build for
     26.04), macOS and Windows under Python 3.9 and 3.13 and
-    the work-system checks; checks that the tag, `lockmaster.__version__` (the
+    the work-system checks; checks that the tag, `docketkit.__version__` (the
     one version source) and a `CHANGELOG.md` section agree
     (`scripts/release.py check`); builds the sdist and wheel, `twine check`s
     them and confirms the wheel carries every kit file; installs the wheel
@@ -335,20 +335,20 @@ the same ideas fit on top of git (`work/compare/source-control.compare.md`).
     trusted publishing (no stored token), PyPI behind the `pypi` environment's
     reviewer; then creates the GitHub release from the CHANGELOG section.
     `scripts/release.py prepare <version>` cuts a version. The wheel carries
-    `kit/` as `lockmaster/kit`, so `lockmaster install` works from a pip
+    `kit/` as `docketkit/kit`, so `docketkit install` works from a pip
     install.
 
 **The repository's own git hooks**
 
-18. **lockmaster's own git steps run a repository's gate hooks, not its post-*
-    hooks** (2026-10-26, W-09). Every git command lockmaster runs carries
-    `-c core.hooksPath=<git-common-dir>/lockmaster/hooks`, where a forwarder for
+18. **docketkit's own git steps run a repository's gate hooks, not its post-*
+    hooks** (2026-10-26, W-09). Every git command docketkit runs carries
+    `-c core.hooksPath=<git-common-dir>/docketkit/hooks`, where a forwarder for
     each gate hook — `pre-commit`, `prepare-commit-msg`, `commit-msg`,
     `pre-merge-commit`, `pre-rebase`, `pre-push`, `applypatch-msg`,
     `pre-applypatch` — runs the repository's own (its `core.hooksPath` or
     `.git/hooks`). So a commit guard still refuses a landing, and a post-commit,
     post-merge or post-checkout side effect does not run inside a worktree
-    lockmaster is about to remove or in `main`'s checkout. **What a landing must
+    docketkit is about to remove or in `main`'s checkout. **What a landing must
     produce, it produces through `[generated]`** (decision 9) — in fux, the
     committed index. A person's or an agent's own git commands are untouched.
 
@@ -359,7 +359,7 @@ it, then it should go ahead and commit it. If co-work cannot commit it, then
 probably Claude Code should go ahead and commit it."*)
 
 19. **A surface that cannot commit hands its edits to one that can** (W-11).
-    `lockmaster save -m … <path>…` lands uncommitted edits made directly in
+    `docketkit save -m … <path>…` lands uncommitted edits made directly in
     `main`'s checkout: a change is started on the paths, the checkout's
     versions are copied into its worktree, and it is submitted (decisions 6–8,
     with 8a accepting the checkout's identical edits). It first asks whether
@@ -368,15 +368,15 @@ probably Claude Code should go ahead and commit it."*)
     would stay), and the checkout must not be another machine's seen through a
     mount — git lists worktrees that do not exist here, outside this checkout,
     under the state directory's `home` (the primary checkout's path where
-    lockmaster first committed, written once, else read off its changes'
+    docketkit first committed, written once, else read off its changes'
     worktree paths) or
     at a `.claude/worktrees/` path: a prune from here would cut them off. Every
-    git command lockmaster runs takes no optional locks, so even reading leaves
+    git command docketkit runs takes no optional locks, so even reading leaves
     no `index.lock` on a surface that cannot remove it. Where it cannot, `save` writes a **handoff** — one new
     file in `handoffs/` naming the paths, the message and who handed it over,
     written aside and renamed in, so nothing is removed — says so in one line,
     and exits 0: handing off is success, not a problem for the decider. The
-    kit's `auto-land.py` runs `lockmaster pickup` on a Claude Code session's
+    kit's `auto-land.py` runs `docketkit pickup` on a Claude Code session's
     start and at the end of each of its turns — no background job
     ([SR-LAW-9](0011_LAW-9-cowork-and-claude-code-together.md) decision 2). A
     handoff's name is taken exclusively, so two written at once never
@@ -395,8 +395,8 @@ probably Claude Code should go ahead and commit it."*)
     reason given, `MISSED`.
 20. **A Claude Code session's changes land at the end of every turn** (W-11).
     The kit's `auto-land.py` exports the session's id at its start, so
-    `lockmaster start` records whose change it is, and at each `Stop` starts
-    `lockmaster sync --pickup` in the background — a landing runs the checks
+    `docketkit start` records whose change it is, and at each `Stop` starts
+    `docketkit sync --pickup` in the background — a landing runs the checks
     and rebuilds, which takes fux ten minutes, accepted (B-007), so no turn waits on it;
     what it landed, held or could not land is said at the next `Stop`. It
     lands on a surface that can commit only: every open change
@@ -410,9 +410,9 @@ probably Claude Code should go ahead and commit it."*)
     on `main` and conflicts stay small. A kept landing that cannot land is
     **held**: the change stays open with the reason, nothing goes to the
     decider, the agent is told once per state of the change, and the next turn
-    tries again. A worktree lockmaster did not create — `claude --worktree`,
+    tries again. A worktree docketkit did not create — `claude --worktree`,
     an agent's own — is **adopted** as a change claiming everything it
-    changed, landed the same way, and never removed by lockmaster; once its
+    changed, landed the same way, and never removed by docketkit; once its
     owner removes it, the change is abandoned; a branch with no history in
     common with `main` is not adopted. At `SessionEnd`, in the background,
     the session's changes are landed and cleaned up as by `submit`; one with
@@ -426,12 +426,28 @@ probably Claude Code should go ahead and commit it."*)
     it ([SR-LAW-8](0010_LAW-8-parallel-requests.md)).
     `[land] auto = "off"` turns it off.
 
+21. **The tool is named docketkit** (ruled by the decider, 2026-11-17): it is
+    a way of working in a repository, not only a lock. The package, the module
+    and the repository are `docketkit`; the command is `docketkit`, with `dk`
+    as a second name for the same entry point; branches are `dk/<item>`; the
+    trailer is `Docketkit-Change`; the kit's queue walk-through skill is
+    `inbox-review` (the name `docket` was the skill's). What the old name left
+    in a repository still works, and moves without loss (SR-LAW-3): `lockmaster.toml`
+    is read until `docketkit.toml` exists; `.git/lockmaster/` is renamed to
+    `.git/docketkit/` the first time docketkit opens the repository; `install`
+    reads `.claude/lockmaster.lock` and replaces it; `drivers` replaces the old
+    `.gitattributes` block; `lm/` branches are still docketkit's own; a landing
+    sets `LOCKMASTER_LANDING` and `LOCKMASTER_CHANGE` beside the new names for a
+    repository's hooks. History keeps the old name: `Lockmaster-Change`
+    trailers are read beside the new one, and `archive/`, the worklog and the
+    changelog's released entries are not rewritten. Test: [`tests/test_rename.py`](../tests/test_rename.py).
+
 ### Consequences
 
 - Landings are serial by design: on one laptop that is the point (one build at
   a time is also what L2's budget wants), at the cost of a queue that waits.
 - Two agents changing the same lines with different intent is still a
-  conflict; lockmaster stops and asks, a person decides.
+  conflict; docketkit stops and asks, a person decides.
 - Decisions 19 and 20 land work every turn: `main` sees work in progress
   that passes the checks, and a repository whose checks are slow pays that
   time at the end of each turn that changed something.
@@ -460,18 +476,18 @@ probably Claude Code should go ahead and commit it."*)
 
 ### Reference (required)
 
-- [`kit/claude/hooks/auto-land.py`](../kit/claude/hooks/auto-land.py) and [`kit/claude/skills/landing/`](../kit/claude/skills/landing/SKILL.md) — decisions 19–20; `src/lockmaster/surface.py` (19); `land.py`'s `save`, `handoff`, `pickup`, `sync`, `adopt` (19–20), `_classify` and `_carry_ledger` (8a), `retry_waiting` and `checkout_overlaps` (11); [`tests/test_autoland.py`](../tests/test_autoland.py), [`tests/test_waiting.py`](../tests/test_waiting.py).
+- [`kit/claude/hooks/auto-land.py`](../kit/claude/hooks/auto-land.py) and [`kit/claude/skills/landing/`](../kit/claude/skills/landing/SKILL.md) — decisions 19–20; `src/docketkit/surface.py` (19); `land.py`'s `save`, `handoff`, `pickup`, `sync`, `adopt` (19–20), `_classify` and `_carry_ledger` (8a), `retry_waiting` and `checkout_overlaps` (11); [`tests/test_autoland.py`](../tests/test_autoland.py), [`tests/test_waiting.py`](../tests/test_waiting.py).
 - [`kit/`](../kit) — decisions 5, 12 and 15; [`kit/work/`](../kit/work) and [`kit/claude/hooks/work-files.py`](../kit/claude/hooks/work-files.py), [`tests/test_work_files.py`](../tests/test_work_files.py) (15, SR-LAW-10); [`kit/claude/hooks/claim-guard.py`](../kit/claude/hooks/claim-guard.py) (5), [`kit/claude/hooks/block-main.py`](../kit/claude/hooks/block-main.py) (12).
-- [`src/lockmaster/`](../src/lockmaster) — decisions 1–15: `land.py` (4–8, 11), `generated.py` (9), `merge.py` and `drivers.py` (10), `config.py` (13), `status.py` and `now.py` (14), `install.py` and `doctor.py` (14–15).
+- [`src/docketkit/`](../src/docketkit) — decisions 1–15 and 21: `land.py` (4–8, 11), `generated.py` (9), `merge.py` and `drivers.py` (10), `config.py` (13), `status.py` and `now.py` (14), `install.py` and `doctor.py` (14–15).
 - [`tests/`](../tests) — one scratch-repo test file per work item that built them.
-- [`lockmaster.toml`](../lockmaster.toml) — this repository's own checks and merge drivers (decision 13).
+- [`docketkit.toml`](../docketkit.toml) — this repository's own checks and merge drivers (decision 13).
 - [`.github/workflows/release.yml`](../.github/workflows/release.yml), [`scripts/release.py`](../scripts/release.py), [`pyproject.toml`](../pyproject.toml) — decision 17.
 
 ### Veto condition
 
-**Reopen this decision if:** a landing ever needs a forced git operation, or `main` holds a commit lockmaster did not make while the block-main hook is installed.
+**Reopen this decision if:** a landing ever needs a forced git operation, or `main` holds a commit docketkit did not make while the block-main hook is installed.
 
-**How to check it:** `grep -rnE -- "--force|branch -D|reset --hard|git clean" src kit` prints nothing, and `git log --first-parent --format='%h %(trailers:key=Lockmaster-Change,valueonly)' main` shows a trailer on every commit after the hook's install.
+**How to check it:** `grep -rnE -- "--force|branch -D|reset --hard|git clean" src kit` prints nothing, and `git log --first-parent --format='%h %(trailers:key=Docketkit-Change,key=Lockmaster-Change,valueonly)' main` shows a trailer on every commit after the hook's install.
 
 ---
 
@@ -479,7 +495,7 @@ probably Claude Code should go ahead and commit it."*)
 
 **Records** — [SR-LAW-3](0005_LAW-3-never-lose-work.md) · [SR-LAW-4](0006_LAW-4-zero-dependencies.md) · [SR-LAW-6](0008_LAW-6-python-only.md) · [SR-WORK-CLEANUP](0062_WORK-cleanup.md) · [SR-WORK-NOW](0061_WORK-now.md) · [SR-WORK-OPEN-QUEUE](0051_WORK-open-queue.md) · [SR-LAW-2](0004_LAW-2-machine-budget.md)
 
-**Code** — [`src/lockmaster/`](../src/lockmaster) · [`kit/`](../kit) · [`tests/`](../tests) · [`lockmaster.toml`](../lockmaster.toml)
+**Code** — [`src/docketkit/`](../src/docketkit) · [`kit/`](../kit) · [`tests/`](../tests) · [`docketkit.toml`](../docketkit.toml)
 
 **Project docs** — [`work/compare/source-control.compare.md`](../work/compare/source-control.compare.md) · [`work/MACHINE.md`](../work/MACHINE.md)
 

@@ -81,12 +81,12 @@ class ScratchCase(unittest.TestCase):
         return git(cwd, "rev-parse", "HEAD")
 
     def repo(self):
-        from lockmaster.repo import Repo
+        from docketkit.repo import Repo
         return Repo(self.root)
 
     def cli(self, *argv, cwd=None):
-        """Run `lockmaster <argv>` in-process from `cwd`; (exit code, stdout, stderr)."""
-        from lockmaster.cli import main
+        """Run `docketkit <argv>` in-process from `cwd`; (exit code, stdout, stderr)."""
+        from docketkit.cli import main
         os.chdir(str(cwd or self.root))
         out, err = io.StringIO(), io.StringIO()
         with redirect_stdout(out), redirect_stderr(err):

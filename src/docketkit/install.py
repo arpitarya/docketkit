@@ -1,13 +1,13 @@
-"""`lockmaster install <repo>` — SR-ARCHITECTURE decisions 14 and 15.
+"""`docketkit install <repo>` — SR-ARCHITECTURE decisions 14 and 15.
 
     kit/claude/**  ->  <repo>/.claude/**   hooks made executable
     kit/github/**  ->  <repo>/.github/**   (none today: a repository's CI is its own)
     kit/claude/settings.json is MERGED into <repo>/.claude/settings.json: the
         kit's hook entries replace the ones a previous install wrote; the
         repo's own entries and keys are kept
-    <repo>/.claude/lockmaster.lock  records the version, the kit's digest and
-        each installed file's hash, so `lockmaster doctor` sees a mismatch
-    the merge drivers, when the repo has a lockmaster.toml
+    <repo>/.claude/docketkit.lock  records the version, the kit's digest and
+        each installed file's hash, so `docketkit doctor` sees a mismatch
+    the merge drivers, when the repo has a docketkit.toml
     kit/work/<file>  ->  <repo>/work/<file>  for each of the six work files the
         repo lacks (SR-LAW-10 decision 6); one that exists is never touched,
         and they are the project's own papers, not kit files (decision 16)
@@ -19,7 +19,7 @@
 
 An existing file the kit would replace, and which a previous install did not
 write, is never overwritten silently: the install stops and names it, or with
---backup moves it aside to `<file>.pre-lockmaster` first (SR-LAW-3).
+--backup moves it aside to `<file>.pre-docketkit` first (SR-LAW-3).
 """
 import hashlib
 import json
@@ -28,32 +28,34 @@ import stat
 from datetime import date
 from pathlib import Path
 
-from lockmaster import __version__
-from lockmaster import git
-from lockmaster.repo import LockmasterError
+from docketkit import __version__
+from docketkit import config as config_mod
+from docketkit import git
+from docketkit.repo import DocketkitError
 
-LOCK = ".claude/lockmaster.lock"
+LOCK = ".claude/docketkit.lock"
+LEGACY_LOCK = ".claude/lockmaster.lock"   # a kit installed under the old name
 SETTINGS = ".claude/settings.json"
 TREES = (("claude", ".claude"), ("github", ".github"))
-# SR-LAW-10: the six work files every repository lockmaster is installed in keeps.
+# SR-LAW-10: the six work files every repository docketkit is installed in keeps.
 WORK_FILES = ("OPEN-WORK.md", "BACKLOG.md", "INTERVIEW.md", "MACHINE.md", "LESSONS.md", "WORKLOG.md")
 # SR-ARCHITECTURE decision 15: scaffolded only into a repository that has no records/
 # of its own — the records, and the scripts that are their executable form.
 WITH_RECORDS = ("records", "scripts")
-# kit/scaffold/_archive -> <repo>/archive: under its own name lockmaster's one-archive
+# kit/scaffold/_archive -> <repo>/archive: under its own name docketkit's one-archive
 # check (SR-WORK-ARCHIVE decision 1) would read the template as a second archive.
 RENAMED = {"_archive": "archive"}
 
 
 def find_kit():
-    """The kit this lockmaster carries: $LOCKMASTER_KIT, the package's own
+    """The kit this docketkit carries: $DOCKETKIT_KIT, the package's own
     copy, or the source checkout's kit/."""
-    env = os.environ.get("LOCKMASTER_KIT")
+    env = os.environ.get("DOCKETKIT_KIT")
     here = Path(__file__).resolve().parent
     for cand in ([Path(env)] if env else []) + [here / "kit", here.parents[1] / "kit"]:
         if (cand / "claude").is_dir():
             return cand
-    raise LockmasterError("cannot find the kit (set LOCKMASTER_KIT to a kit/ directory)")
+    raise DocketkitError("cannot find the kit (set DOCKETKIT_KIT to a kit/ directory)")
 
 
 def sha(path):
@@ -86,7 +88,10 @@ def kit_digest(kit):
 
 def read_lock(target):
     try:
-        return json.loads((Path(target) / LOCK).read_text(encoding="utf-8"))
+        lock = Path(target) / LOCK
+        if not lock.is_file() and (Path(target) / LEGACY_LOCK).is_file():
+            lock = Path(target) / LEGACY_LOCK
+        return json.loads(lock.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
 
@@ -124,7 +129,7 @@ def merge_settings(current, kit_settings, managed_before):
 def install(target, backup=False, out=print):
     target = Path(target).resolve()
     if git.run(["rev-parse", "--show-toplevel"], target, check=False)[0] != 0:
-        raise LockmasterError("not a git repository: {}".format(target))
+        raise DocketkitError("not a git repository: {}".format(target))
     kit = find_kit()
     old = read_lock(target)
     old_files = old.get("files", {})
@@ -138,15 +143,15 @@ def install(target, backup=False, out=print):
             if cur != sha(src) and old_files.get(rel) != cur:
                 conflicts.append(rel)
     if conflicts and not backup:
-        raise LockmasterError(
-            "these files exist and were not written by a lockmaster install; nothing was changed:\n  "
+        raise DocketkitError(
+            "these files exist and were not written by a docketkit install; nothing was changed:\n  "
             + "\n  ".join(conflicts)
-            + "\nrun again with --backup to move each aside to <file>.pre-lockmaster first")
+            + "\nrun again with --backup to move each aside to <file>.pre-docketkit first")
     for rel in conflicts:
         dst = target / rel
-        aside, n = dst.with_name(dst.name + ".pre-lockmaster"), 1
+        aside, n = dst.with_name(dst.name + ".pre-docketkit"), 1
         while aside.exists():
-            aside, n = dst.with_name("{}.pre-lockmaster.{}".format(dst.name, n)), n + 1
+            aside, n = dst.with_name("{}.pre-docketkit.{}".format(dst.name, n)), n + 1
         os.rename(str(dst), str(aside))
         out("  moved aside: {} -> {}".format(rel, aside.relative_to(target).as_posix()))
 
@@ -183,22 +188,25 @@ def install(target, backup=False, out=print):
     lock = {"version": __version__, "kit": kit_digest(kit), "files": files,
             "settings": sorted(_commands(kit_settings))}
     (target / LOCK).write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if (target / LEGACY_LOCK).is_file():
+        (target / LEGACY_LOCK).unlink()   # install's own file, replaced by LOCK just above
+        out("  replaced: {} -> {}".format(LEGACY_LOCK, LOCK))
     out("installed kit {} into {}: {} files, settings merged".format(lock["kit"][:12], target, len(files)))
 
-    from lockmaster.repo import Repo
-    from lockmaster import drivers
+    from docketkit.repo import Repo
+    from docketkit import drivers
     repo = Repo(target)
-    if (target / "lockmaster.toml").is_file():
-        from lockmaster import surface
+    if config_mod.path(target).is_file():
+        from docketkit import surface
         if surface.foreign(repo) or not surface.can_unlink(repo):
             # Decision 10: a driver registered here would name this surface's
             # paths; the machine that commits registers it on its first landing.
             if drivers.write_attributes(repo.root, repo.config.merge):
-                out("  .gitattributes: lockmaster's [merge] block written — commit it")
+                out("  .gitattributes: docketkit's [merge] block written — commit it")
             out("  merge drivers not registered from here: the next landing on the machine that commits does it")
         else:
             if drivers.install(repo):
-                out("  .gitattributes: lockmaster's [merge] block written — commit it")
+                out("  .gitattributes: docketkit's [merge] block written — commit it")
             out("  merge drivers registered in .git/config")
     made = work_files(target, kit)
     if made:

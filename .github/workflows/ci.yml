@@ -1,4 +1,4 @@
-# lockmaster's own CI — not in the kit: a repository's CI is its own (SR-ARCHITECTURE decision 16).
+# docketkit's own CI — not in the kit: a repository's CI is its own (SR-ARCHITECTURE decision 16).
 name: ci
 
 on:

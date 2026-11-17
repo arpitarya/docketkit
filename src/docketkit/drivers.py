@@ -1,19 +1,20 @@
 """Installing the structural merge drivers — SR-ARCHITECTURE decision 10.
 
 Each driver is registered in the repository's `.git/config` as
-`merge.lockmaster-<driver>`, and `.gitattributes` gets one line per
-`lockmaster.toml` `[merge]` path, inside a block lockmaster owns. Usable from
+`merge.docketkit-<driver>`, and `.gitattributes` gets one line per
+`docketkit.toml` `[merge]` path, inside a block docketkit owns. Usable from
 plain git: `git merge` and `git cherry-pick` call the drivers too.
 """
 import shlex
 import sys
 from pathlib import Path
 
-from lockmaster import git
-from lockmaster.merge import DRIVERS
+from docketkit import git
+from docketkit.merge import DRIVERS
 
-BEGIN = "# lockmaster:begin — written by `lockmaster drivers` from lockmaster.toml [merge]; edit that, not this"
-END = "# lockmaster:end"
+BEGIN = "# docketkit:begin — written by `docketkit drivers` from docketkit.toml [merge]; edit that, not this"
+END = "# docketkit:end"
+MARKS = (("# docketkit:begin", END), ("# lockmaster:begin", "# lockmaster:end"))   # the new block, the old one
 
 
 def driver_command(name):
@@ -26,20 +27,21 @@ def attributes_block(merge):
     for path, driver in merge.items():
         if any(c.isspace() for c in path):
             raise ValueError("a [merge] path with whitespace cannot go into .gitattributes: " + path)
-        lines.append("{} merge=lockmaster-{}".format(path, driver))
+        lines.append("{} merge=docketkit-{}".format(path, driver))
     return lines + [END]
 
 
 def write_attributes(root, merge):
-    """Replace lockmaster's block in `.gitattributes` (or add it); everything
+    """Replace docketkit's block in `.gitattributes` (or add it); everything
     else in the file is kept as it is. Returns True when the file changed."""
     path = Path(root) / ".gitattributes"
     old = path.read_text(encoding="utf-8") if path.exists() else ""
     lines = old.splitlines()
-    if BEGIN.split(" —")[0] in "\n".join(lines):
-        start = next(i for i, l in enumerate(lines) if l.startswith(BEGIN.split(" —")[0]))
-        end = next((i for i in range(start, len(lines)) if lines[i] == END), len(lines) - 1)
-        lines = lines[:start] + lines[end + 1:]
+    for begin, end_mark in MARKS:
+        if begin in "\n".join(lines):
+            start = next(i for i, l in enumerate(lines) if l.startswith(begin))
+            end = next((i for i in range(start, len(lines)) if lines[i] == end_mark), len(lines) - 1)
+            lines = lines[:start] + lines[end + 1:]
     while lines and not lines[-1].strip():
         lines.pop()
     block = attributes_block(merge) if merge else []
@@ -61,7 +63,7 @@ def stale(repo):
     drivers that are registered count; an unregistered one is `doctor`'s."""
     out = []
     for name in DRIVERS:
-        code, cmd, _ = git.run(["config", "--get", "merge.lockmaster-{}.driver".format(name)], repo.root,
+        code, cmd, _ = git.run(["config", "--get", "merge.docketkit-{}.driver".format(name)], repo.root,
                                check=False)
         if code != 0:
             continue
@@ -79,15 +81,15 @@ def heal(repo):
     paths (SR-ARCHITECTURE decision 10). Returns the drivers re-pointed."""
     names = stale(repo)
     for name in names:
-        git.run(["config", "merge.lockmaster-{}.driver".format(name), driver_command(name)], repo.root)
+        git.run(["config", "merge.docketkit-{}.driver".format(name), driver_command(name)], repo.root)
     return names
 
 
 def install(repo):
     """Register every driver in .git/config; write .gitattributes from [merge]."""
     for name in DRIVERS:
-        key = "merge.lockmaster-" + name
-        git.run(["config", key + ".name", "lockmaster " + name + " (SR-ARCHITECTURE decision 10)"], repo.root)
+        key = "merge.docketkit-" + name
+        git.run(["config", key + ".name", "docketkit " + name + " (SR-ARCHITECTURE decision 10)"], repo.root)
         git.run(["config", key + ".driver", driver_command(name)], repo.root)
     changed = write_attributes(repo.root, repo.config.merge)
     return changed

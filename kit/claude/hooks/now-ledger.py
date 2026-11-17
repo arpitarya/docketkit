@@ -90,22 +90,22 @@ def read_now():
 
 
 def command_env():
-    """The site-packages of the `lockmaster` command on PATH (`uv tool`, pipx)."""
+    """The site-packages of the `docketkit` command on PATH (`uv tool`, pipx)."""
     import shutil
-    exe = shutil.which("lockmaster")
+    exe = shutil.which("docketkit")
     if not exe:
         return None
     env = Path(exe).resolve().parent.parent
     for site in sorted(env.glob("lib/python3*/site-packages")) + [env / "Lib" / "site-packages"]:
-        if (site / "lockmaster" / "now.py").is_file():
+        if (site / "docketkit" / "now.py").is_file():
             return site
     return None
 
 
 def renderer():
-    """lockmaster's NOW.md renderer (`lockmaster.now`) when it is reachable —
-    this repository's own src/, importable, or the `lockmaster` command's
-    environment — so NOW.md always equals `lockmaster status --now`
+    """docketkit's NOW.md renderer (`docketkit.now`) when it is reachable —
+    this repository's own src/, importable, or the `docketkit` command's
+    environment — so NOW.md always equals `docketkit status --now`
     (SR-ARCHITECTURE decision 14, W-07)."""
     for extra in (None, ROOT / "src", "command"):
         if extra == "command":
@@ -113,11 +113,11 @@ def renderer():
             if extra is None:
                 continue
         if extra is not None:
-            if not (Path(extra) / "lockmaster" / "now.py").is_file():
+            if not (Path(extra) / "docketkit" / "now.py").is_file():
                 continue
             sys.path.insert(0, str(extra))
         try:
-            from lockmaster import now
+            from docketkit import now
             return now
         except ImportError:
             continue
@@ -129,7 +129,7 @@ def write_now(head, flight, res):
     if mod is not None:
         text = mod.format_now(head, flight, mod.normalise(res, ROOT))
     else:
-        # The same shape lockmaster.now writes, for a repo without lockmaster.
+        # The same shape docketkit.now writes, for a repo without docketkit.
         def table(header, rows, n):
             out = [header, "|" + "---|" * n]
             out += ["| " + " | ".join((r + [""] * n)[:n]) + " |" for r in rows]

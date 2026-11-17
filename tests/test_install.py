@@ -1,4 +1,4 @@
-"""W-06 — `lockmaster install <repo>` and `lockmaster doctor`
+"""W-06 — `docketkit install <repo>` and `docketkit doctor`
 (SR-ARCHITECTURE decisions 14 and 15)."""
 import json
 import os
@@ -7,7 +7,7 @@ import unittest
 
 from support import ROOT, ScratchCase
 
-from lockmaster import install
+from docketkit import install
 
 OWN_HOOK = {"matcher": "Bash", "hooks": [{"type": "command", "command": "echo the repo's own hook"}]}
 
@@ -49,7 +49,7 @@ class Install(ScratchCase):
         n_kit = sum(len(v) for v in kit["hooks"].values())
         self.assertEqual(sum(len(v) for v in again["hooks"].values()), n_kit + 1)
 
-    def test_a_file_lockmaster_did_not_write_is_never_overwritten_silently(self):
+    def test_a_file_docketkit_did_not_write_is_never_overwritten_silently(self):
         hook = self.root / ".claude/hooks/inject-inbox.sh"
         hook.parent.mkdir(parents=True)
         hook.write_text("the repo's own hook\n")
@@ -60,7 +60,7 @@ class Install(ScratchCase):
         self.assertFalse((self.root / ".claude/settings.json").exists())
         code, out, err = self.install("--backup")
         self.assertEqual(code, 0, err)
-        self.assertEqual((hook.parent / "inject-inbox.sh.pre-lockmaster").read_text(), "the repo's own hook\n")
+        self.assertEqual((hook.parent / "inject-inbox.sh.pre-docketkit").read_text(), "the repo's own hook\n")
 
     def test_the_repos_own_ci_is_never_touched(self):
         ci = self.root / ".github/workflows/ci.yml"
@@ -69,7 +69,7 @@ class Install(ScratchCase):
         code, _, err = self.install()
         self.assertEqual(code, 0, err)
         self.assertEqual(ci.read_text(), "the repo's own CI\n")
-        self.assertFalse((ci.parent / "ci.yml.pre-lockmaster").exists())
+        self.assertFalse((ci.parent / "ci.yml.pre-docketkit").exists())
 
     def test_the_version_is_pinned_and_doctor_reports_a_mismatch(self):
         self.install()
@@ -81,7 +81,7 @@ class Install(ScratchCase):
         (self.root / install.LOCK).write_text(json.dumps(lock))
         code, out, _ = self.cli("doctor")
         self.assertEqual(code, 1)
-        self.assertIn("installed kit is from lockmaster 0.0.0-older", out)
+        self.assertIn("installed kit is from docketkit 0.0.0-older", out)
 
     def test_doctor_reports_a_hand_edited_hook(self):
         self.install()

@@ -51,7 +51,7 @@ flowchart LR
 
 ### Context
 
-The Cowork bridge cannot commit (SR-ARCHITECTURE decision 19), so its edits are handed off and landed by `lockmaster pickup`, which the kit's `auto-land.py` runs at a Claude Code session's start and at the end of each turn. Pickup used to land whatever sat under a handoff's paths at pickup time, so another session's later edit rode in under the handoff's message. And Cowork edits left in `main`'s checkout turned three codelaw landings red ([W-10](../archive/open/W-10-dirty-main-checkout.md)).
+The Cowork bridge cannot commit (SR-ARCHITECTURE decision 19), so its edits are handed off and landed by `docketkit pickup`, which the kit's `auto-land.py` runs at a Claude Code session's start and at the end of each turn. Pickup used to land whatever sat under a handoff's paths at pickup time, so another session's later edit rode in under the handoff's message. And Cowork edits left in `main`'s checkout turned three codelaw landings red ([W-10](../archive/open/W-10-dirty-main-checkout.md)).
 
 ### Decision
 
@@ -59,7 +59,7 @@ The Cowork bridge cannot commit (SR-ARCHITECTURE decision 19), so its edits are 
 2. **A handoff lands at the next Claude Code session's start** in that repository — the session's hook runs `pickup`, no model involved (L7). No background job runs it: the decider ruled that the next Claude Code session is soon enough, and opening one for ordinary work is not a manual step. Every pickup that lands nothing it could have is a breach.
 3. **What lands is what was handed over.** A handoff records each file's content digest. A file edited in `main`'s checkout after its handoff, and not handed off again, holds the handoff — nothing lands under its message — until that edit is handed off too or undone. Handoffs that name a common file land together, as one change under all their messages, since the file holds the newest edit. A handoff that went red is fixed where it is; edits after that are its fix.
 4. **One surface's edits never turn the other's landing red.** A Cowork edit sitting in `main`'s checkout makes a Claude Code landing wait, not fail ([W-10](../archive/open/W-10-dirty-main-checkout.md)); the edit itself is never touched.
-5. **Which surface can commit is lockmaster's question.** `lockmaster can-commit` decides; the decider is never asked.
+5. **Which surface can commit is docketkit's question.** `docketkit can-commit` decides; the decider is never asked.
 6. **Parallel requests from both surfaces are L8's** ([SR-LAW-8](0010_LAW-8-parallel-requests.md)); this law adds that the two surfaces' differences never need a person.
 
 ### Consequences
@@ -77,14 +77,14 @@ The Cowork bridge cannot commit (SR-ARCHITECTURE decision 19), so its edits are 
 ### Reference (required)
 
 - [SR-ARCHITECTURE](0101_architecture.md) decisions 19–20 — the handoff and every-turn landing this law binds.
-- [`src/lockmaster/surface.py`](../src/lockmaster/surface.py) — `can-commit`.
+- [`src/docketkit/surface.py`](../src/docketkit/surface.py) — `can-commit`.
 - [`tests/test_parallel.py`](../tests/test_parallel.py) — held, joined and missed handoffs.
 
 ### Veto condition
 
 **Reopen this decision if:** a handoff survives a pickup with no reason given (`queue` marks it `MISSED`), or a held or red change's reason is the other surface's uncommitted edit.
 
-**How to check it:** `PYTHONPATH=src python3 -m lockmaster queue | grep -E 'MISSED|uncommitted edits there'` prints nothing.
+**How to check it:** `PYTHONPATH=src python3 -m docketkit queue | grep -E 'MISSED|uncommitted edits there'` prints nothing.
 
 ---
 
@@ -94,8 +94,8 @@ The Cowork bridge cannot commit (SR-ARCHITECTURE decision 19), so its edits are 
 
 **Code**
 
-- [`src/lockmaster/surface.py`](../src/lockmaster/surface.py)
-- [`src/lockmaster/land.py`](../src/lockmaster/land.py)
+- [`src/docketkit/surface.py`](../src/docketkit/surface.py)
+- [`src/docketkit/land.py`](../src/docketkit/land.py)
 - [`tests/test_parallel.py`](../tests/test_parallel.py)
 
 **Project docs**

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from support import ROOT, ScratchCase
 
-from lockmaster import doctor, install
+from docketkit import doctor, install
 
 SCAFFOLD = ROOT / "kit" / "scaffold"
 EVERY = sorted(p.relative_to(SCAFFOLD).as_posix().replace("_archive/", "archive/", 1)
@@ -32,7 +32,7 @@ class Scaffold(ScratchCase):
         for rel in EVERY:
             self.assertTrue((self.root / rel).is_file(), rel)
         self.assertIn("work system scaffolded", out)
-        lock = json.loads((self.root / ".claude" / "lockmaster.lock").read_text())
+        lock = json.loads((self.root / ".claude" / "docketkit.lock").read_text())
         self.assertFalse(set(EVERY) & set(lock["files"]))  # the project's papers, not kit files
 
     def test_an_existing_file_is_never_overwritten(self):
@@ -77,12 +77,12 @@ class Scaffold(ScratchCase):
                     bad.append("{} -> {}".format(rel, link))
         self.assertEqual(bad, [])
 
-    def test_no_bare_lockmaster_item_id(self):
-        # In a consumer, lockmaster's W-nn is another project's item: `**lockmaster W-nn**` (rule 23b).
+    def test_no_bare_docketkit_item_id(self):
+        # In a consumer, docketkit's W-nn is another project's item: `**docketkit W-nn**` (rule 23b).
         for rel in EVERY:
             if rel.endswith(".md"):
                 text = (SCAFFOLD / rel.replace("archive/", "_archive/", 1)).read_text(encoding="utf-8")
-                bare = re.findall(r"(?<!lockmaster )(?<!fux )\bW-\d+\b", text)
+                bare = re.findall(r"(?<!docketkit )(?<!fux )\bW-\d+\b", text)
                 self.assertEqual(bare, [], rel)
 
     def test_the_inbox_template_carries_its_date(self):

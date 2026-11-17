@@ -100,18 +100,18 @@ where someone will pick it up, not in a live view.
   row, closes dead sessions), `show` on every prompt, `sync` after Bash, Agent
   and worktree calls, `stop` on `Stop` (asks once for an empty `working on`
   cell), `end` on `SessionEnd` (cleans or queues what the session left — SR-WORK-CLEANUP — then removes the rows).
-- **Every write goes through one renderer** — `lockmaster.now`
-  (lockmaster's SR-ARCHITECTURE decision 14) when lockmaster is
-  reachable — importable, the repository's own `src/`, or the `lockmaster`
-  command's own environment (2026-11-08, **lockmaster W-16**; never a checkout beside the
+- **Every write goes through one renderer** — `docketkit.now`
+  (docketkit's SR-ARCHITECTURE decision 14) when docketkit is
+  reachable — importable, the repository's own `src/`, or the `docketkit`
+  command's own environment (2026-11-08, **docketkit W-16**; never a checkout beside the
   repository) — else the same shape in `now-ledger.py` — and drops any resource
-  row whose path is gone, so NOW.md equals `lockmaster status --now` after
+  row whose path is gone, so NOW.md equals `docketkit status --now` after
   each session end, as it does after each landing.
-- **No `work/NOW.md`, no ledger:** in a repository that has lockmaster's kit
-  but not the work system, `now-ledger.py` does nothing and writes nothing (**lockmaster W-09**).
+- **No `work/NOW.md`, no ledger:** in a repository that has docketkit's kit
+  but not the work system, `now-ledger.py` does nothing and writes nothing (**docketkit W-09**).
 - **What it files is in the queue's own style** — a bullet row where the queue
   uses bullets, the item under its group, and the group's `(N)` count moved with
-  the row ([SR-WORK-OPEN-QUEUE](0051_WORK-open-queue.md) rule 37b; **lockmaster W-09**).
+  the row ([SR-WORK-OPEN-QUEUE](0051_WORK-open-queue.md) rule 37b; **docketkit W-09**).
 - A crash loses nothing that matters: the row survives until the next session
   closes it, and its leftovers become a work item then.
 - `require-progress.sh` ([SR-WORK-SESSION](./0054_WORK-session.md)) still nudges a session that

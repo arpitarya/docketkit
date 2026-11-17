@@ -1,10 +1,10 @@
 * text=auto eol=lf
 
-# lockmaster:begin — written by `lockmaster drivers` from lockmaster.toml [merge]; edit that, not this
-work/WORKLOG.md merge=lockmaster-append-newest-first
-work/LESSONS.md merge=lockmaster-append-newest-first
-work/IMPLEMENTATION.md merge=lockmaster-append-newest-first
-work/OPEN-WORK.md merge=lockmaster-table-rows
-work/BACKLOG.md merge=lockmaster-table-rows
-archive/README.md merge=lockmaster-table-rows
-# lockmaster:end
+# docketkit:begin — written by `docketkit drivers` from docketkit.toml [merge]; edit that, not this
+work/WORKLOG.md merge=docketkit-append-newest-first
+work/LESSONS.md merge=docketkit-append-newest-first
+work/IMPLEMENTATION.md merge=docketkit-append-newest-first
+work/OPEN-WORK.md merge=docketkit-table-rows
+work/BACKLOG.md merge=docketkit-table-rows
+archive/README.md merge=docketkit-table-rows
+# docketkit:end

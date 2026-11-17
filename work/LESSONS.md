@@ -23,22 +23,22 @@ pipeline can publish.
 
 ## 2026-11-08 — the shell here is zsh: an unquoted `$PATHS` is one argument
 
-A list of 64 paths built with `PATHS=$(…)` and passed as `lockmaster save … $PATHS`
+A list of 64 paths built with `PATHS=$(…)` and passed as `docketkit save … $PATHS`
 reached `save` as a single path made of newlines; it answered *nothing uncommitted
 under …* and landed nothing. bash splits that word; zsh does not. Pass a list
-through a file — `tr '\n' '\0' < list | xargs -0 lockmaster save -m … ` — which
+through a file — `tr '\n' '\0' < list | xargs -0 docketkit save -m … ` — which
 reads the same under either shell and gets past the safety check that zsh-only
 expansions such as `${(f)…}` trip.
 
 ## 2026-11-07 — installing the kit from a change's worktree points the merge drivers at that worktree
 
-Dogfooding means `lockmaster install .` after a kit edit, and the edit is made in
+Dogfooding means `docketkit install .` after a kit edit, and the edit is made in
 a change's worktree. The install registered the merge drivers in the shared
-`.git/config` with the worktree's `src/lockmaster/merge.py`, a path that goes
+`.git/config` with the worktree's `src/docketkit/merge.py`, a path that goes
 away when the change lands. Every `run` re-points a driver whose path is missing
 (the 2026-10-28 gate), so it heals, but a plain `git merge` in between would
 use a dead driver. Remedy: judgment — after installing from a worktree, run
-`lockmaster drivers` from main's checkout.
+`docketkit drivers` from main's checkout.
 
 ## 2026-11-05 — a one-line ruling drafted into a law grew a mechanism nobody ruled
 
@@ -53,7 +53,7 @@ before it is written in, not after. Remedy: judgment.
 
 Installing from the Cowork bridge wrote the bridge's `python3` and `merge.py`
 paths into five repositories' `.git/config` — the second time (W-09 recorded the
-first, 2026-10-25, fixed by hand). Anything lockmaster writes that names a
+first, 2026-10-25, fixed by hand). Anything docketkit writes that names a
 path — a merge driver, a worktree, a `home` — names the machine that wrote it.
 The bridge and the Mac see the same files at different paths, so a fix by hand
 on one surface does not stop the next write from the other. Remedy, by the

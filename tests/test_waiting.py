@@ -9,8 +9,8 @@ from pathlib import Path
 
 from support import NO_X, ROOT, ScratchCase, git, toml_str
 
-from lockmaster import doctor, land, status
-from lockmaster.repo import LANDED, OPEN, QUEUED, RED, WAITING
+from docketkit import doctor, land, status
+from docketkit.repo import LANDED, OPEN, QUEUED, RED, WAITING
 
 HOOKS = ROOT / "kit" / "claude" / "hooks"
 
@@ -56,7 +56,7 @@ class Waiting(ScratchCase):
         self.assertEqual(c["status"], LANDED)
         self.assertEqual(self.main_file("a.txt"), "mine")
         self.assertEqual((self.root / "a.txt").read_text(), "mine\n")  # the checkout moved with main
-        self.assertEqual(git(self.root, "for-each-ref", "refs/lockmaster/"), "")  # the kept commit is let go
+        self.assertEqual(git(self.root, "for-each-ref", "refs/docketkit/"), "")  # the kept commit is let go
 
     def test_it_lands_once_the_checkout_holds_the_same_edit(self):
         w = self.start("W-1", "a.txt")
@@ -69,7 +69,7 @@ class Waiting(ScratchCase):
 
     def test_waiting_does_not_run_the_checks_again(self):
         count = Path(self._tmp.name) / "checks-ran"
-        (self.root / "lockmaster.toml").write_text("[checks]\ncount = {}\n".format(toml_str("echo x >> {}".format(count))))
+        (self.root / "docketkit.toml").write_text("[checks]\ncount = {}\n".format(toml_str("echo x >> {}".format(count))))
         self.commit("config")
         w = self.start("W-1", "a.txt")
         (w / "a.txt").write_text("mine\n")
@@ -106,7 +106,7 @@ class Waiting(ScratchCase):
         self.assertEqual(git(self.root, "status", "--porcelain"), "M b.txt")
 
     def test_other_refusals_stay_red(self):
-        (self.root / "lockmaster.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
+        (self.root / "docketkit.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
         self.commit("config")
         w = self.start("W-1", "a.txt")
         (w / "a.txt").write_text("x\n")
@@ -165,7 +165,7 @@ class Waiting(ScratchCase):
         self.assertEqual(self.main_file("work/NOW.md"), "# NOW\n\nthe live row")  # the checkout's is the newest
         self.assertIn("the live row", (self.root / "work" / "NOW.md").read_text())  # re-rendered, not lost
         msg = git(self.root, "log", "-1", "--format=%B", "main")
-        self.assertIn("Lockmaster-Change: W-1", msg)
+        self.assertIn("Docketkit-Change: W-1", msg)
         self.assertEqual(len(git(self.root, "log", "-1", "--format=%P", "main").split()), 2)  # parents kept
 
     def test_save_lands_although_the_ledger_moved_after_its_copy(self):

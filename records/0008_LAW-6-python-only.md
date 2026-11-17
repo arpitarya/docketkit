@@ -3,7 +3,7 @@ type: Standing Record
 kind: law
 name: SR-LAW-6
 title: "SR-LAW-6 (0008) — L6 — Python only, on PyPI"
-description: "lockmaster is Python only — one package, published on PyPI and nowhere else; no npm package"
+description: "docketkit is Python only — one package, published on PyPI and nowhere else; no npm package"
 status: accepted
 date: 2026-10-25
 feature: "Python only, on PyPI as a law"
@@ -20,7 +20,7 @@ ratifies: "Arpit, 2026-10-25 (Cowork), on W-01: 'All the blockers, I accept what
 
 **The law (L6).**
 
-> **lockmaster is a Python-only project.** It is one Python package, `lockmaster`, published on PyPI and nowhere else. There is no npm package, no npm launcher and no second implementation in another language. A repository of any language uses it through `python3` (`pipx install lockmaster`, or `python3 -m lockmaster`).
+> **docketkit is a Python-only project.** It is one Python package, `docketkit`, published on PyPI and nowhere else. There is no npm package, no npm launcher and no second implementation in another language. A repository of any language uses it through `python3` (`pipx install docketkit`, or `python3 -m docketkit`).
 
 **Ruled by Arpit, 2026-10-25,** on [W-01](../archive/open/W-01-rule-the-laws.md): *"All the blockers, I accept whatever is said over there."* — then: *"I want this to be Python only project. I don't believe we need npm."*
 
@@ -28,7 +28,7 @@ ratifies: "Arpit, 2026-10-25 (Cowork), on W-01: 'All the blockers, I accept what
 
 ```mermaid
 flowchart LR
-    R["this repository"] -->|python3 -m build| P["PyPI: lockmaster"]
+    R["this repository"] -->|python3 -m build| P["PyPI: docketkit"]
     R -. never .-> N["npm"]
 ```
 
@@ -36,7 +36,7 @@ flowchart LR
 <summary><b>ASCII twin</b></summary>
 
 ```text
-   this repository --build--> PyPI: lockmaster
+   this repository --build--> PyPI: docketkit
    this repository --never--> npm
 ```
 
@@ -52,9 +52,9 @@ W-01 proposed *one tool, two registries* (PyPI and npm). The decider changed it 
 
 ### Decision
 
-1. **One package, one registry.** `lockmaster` on PyPI is the only distribution. Nothing is published to npm, under any name or scope.
+1. **One package, one registry.** `docketkit` on PyPI is the only distribution. Nothing is published to npm, under any name or scope.
 2. **No Node.** No file in `src/` or `kit/` needs Node to run; no `package.json` in this repository.
-3. **The npm org `@lockmaster`**, created 2026-10-25 a minute before this ruling, holds nothing and is not used; keeping or deleting it is the decider's ([W-08](../work/open/W-08-hold-the-name.md)).
+3. **The npm org `@docketkit`**, created 2026-10-25 a minute before this ruling, holds nothing and is not used; keeping or deleting it is the decider's ([W-08](../work/open/W-08-hold-the-name.md)).
 
 ### Consequences
 

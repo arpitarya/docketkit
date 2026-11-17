@@ -1,10 +1,21 @@
 # Changelog
 
-All notable changes to lockmaster. The format follows
+All notable changes to docketkit (lockmaster until 2026-11-17). The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+### Changed
+
+- **Renamed lockmaster → docketkit** (SR-ARCHITECTURE decision 21): the PyPI
+  package, the module and the command are `docketkit`, with `dk` as a second
+  command name; branches are `dk/<item>`; the trailer is `Docketkit-Change`;
+  `docketkit.toml`, `.git/docketkit/` and `.claude/docketkit.lock` replace the
+  old names; the kit's `docket` skill is now `inbox-review`. A repository set
+  up under the old name keeps working: its config is read, its state directory,
+  kit lock and `.gitattributes` block move to the new names, and `lm/`
+  branches are still recognised. Entries below keep the old name.
 
 ### Fixed
 

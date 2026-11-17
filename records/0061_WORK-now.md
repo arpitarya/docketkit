@@ -100,14 +100,14 @@ where someone will pick it up, not in a live view.
   row, closes dead sessions), `show` on every prompt, `sync` after Bash, Agent
   and worktree calls, `stop` on `Stop` (asks once for an empty `working on`
   cell), `end` on `SessionEnd` (cleans or queues what the session left — SR-WORK-CLEANUP — then removes the rows).
-- **Every write goes through one renderer** — `lockmaster.now`
-  ([SR-ARCHITECTURE](0101_architecture.md) decision 14) when lockmaster is
-  reachable — importable, the repository's own `src/`, or the `lockmaster`
+- **Every write goes through one renderer** — `docketkit.now`
+  ([SR-ARCHITECTURE](0101_architecture.md) decision 14) when docketkit is
+  reachable — importable, the repository's own `src/`, or the `docketkit`
   command's own environment (2026-11-08, W-16; never a checkout beside the
   repository) — else the same shape in `now-ledger.py` — and drops any resource
-  row whose path is gone, so NOW.md equals `lockmaster status --now` after
+  row whose path is gone, so NOW.md equals `docketkit status --now` after
   each session end, as it does after each landing.
-- **No `work/NOW.md`, no ledger:** in a repository that has lockmaster's kit
+- **No `work/NOW.md`, no ledger:** in a repository that has docketkit's kit
   but not the work system, `now-ledger.py` does nothing and writes nothing (W-09).
 - **What it files is in the queue's own style** — a bullet row where the queue
   uses bullets, the item under its group, and the group's `(N)` count moved with

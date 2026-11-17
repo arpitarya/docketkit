@@ -126,7 +126,7 @@ of it and the decider's call on the other.
   regenerated. That is deliberate; the list grows only by the decider's ruling.
 - The list also carries the decider's fux and codelaw rulings — `htmlcov`,
   `.eggs`, `runtime`, `.codelaw` — joined in the kit when it was adopted there
-  (W-09). lockmaster's own landing cleanup keeps the same list, and a test
+  (W-09). docketkit's own landing cleanup keeps the same list, and a test
   fails if the two copies differ.
 - `.claude/hooks/now-ledger.py` ([SR-WORK-NOW](0061_WORK-now.md)) calls this record's
   module at `SessionEnd` and files the items of decisions 3 and 7.

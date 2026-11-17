@@ -5,7 +5,7 @@ description: "Cold-start state of play for a successor session: in-flight work, 
 
 # INTERVIEW — the state of play
 
-Written by `lockmaster install` (lockmaster's law L10). Keep it current
+Written by `docketkit install` (docketkit's law L10). Keep it current
 **during** the session, written for a different model arriving with no other
 context, mid-task.
 

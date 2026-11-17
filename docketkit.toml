@@ -1,5 +1,5 @@
-# lockmaster's own landing rules — SR-ARCHITECTURE decision 13.
-# Read by `lockmaster` from the main checkout; every landing runs [checks].
+# docketkit's own landing rules — SR-ARCHITECTURE decision 13.
+# Read by `docketkit` from the main checkout; every landing runs [checks].
 
 [main]
 branch = "main"

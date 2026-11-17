@@ -1,7 +1,7 @@
-"""W-09 — lockmaster's own git steps run the repository's gate hooks and not its
+"""W-09 — docketkit's own git steps run the repository's gate hooks and not its
 post-* hooks (SR-ARCHITECTURE decision 18). fux's post-commit, post-merge and
 post-checkout re-index its docs; run inside a landing they would write into a
-worktree lockmaster is about to remove, and into main's checkout."""
+worktree docketkit is about to remove, and into main's checkout."""
 import os
 import stat
 import sys
@@ -10,8 +10,8 @@ from pathlib import Path
 
 from support import ScratchCase, git
 
-from lockmaster import land
-from lockmaster.repo import LANDED, RED
+from docketkit import land
+from docketkit.repo import LANDED, RED
 
 
 class GateHooksOnly(ScratchCase):
@@ -38,7 +38,7 @@ class GateHooksOnly(ScratchCase):
         self.assertFalse(marks.exists(), marks.read_text() if marks.exists() else "")
         self.assertEqual(self.land("W-2", "b.txt", "b\nW-2\n", "W-2: REJECT me")["status"], RED)
         git(self.root, "commit", "--allow-empty", "-q", "-m", "a person's own commit")
-        self.assertIn("post-commit", marks.read_text())  # outside lockmaster, the repo's hooks are untouched
+        self.assertIn("post-commit", marks.read_text())  # outside docketkit, the repo's hooks are untouched
 
 
 if __name__ == "__main__":

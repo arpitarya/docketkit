@@ -10,8 +10,8 @@ from pathlib import Path
 
 from support import NO_X, ROOT, SRC, ScratchCase, git
 
-from lockmaster import land, surface
-from lockmaster.repo import LANDED, OPEN, RED, WAITING
+from docketkit import land, surface
+from docketkit.repo import LANDED, OPEN, RED, WAITING
 
 HOOK = ROOT / "kit" / "claude" / "hooks" / "auto-land.py"
 
@@ -54,7 +54,7 @@ class AutoLand(ScratchCase):
         self.assertEqual(land.sync(self.repo(), session="s-1", cwd=str(w)), ["W-1"])
 
     def test_a_failed_check_holds_the_change_and_reports_once(self):
-        (self.root / "lockmaster.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
+        (self.root / "docketkit.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
         self.commit("config")
         w = self.start("W-1", "a.txt")
         (w / "a.txt").write_text("x marks it\n")
@@ -78,13 +78,13 @@ class AutoLand(ScratchCase):
         self.assertFalse(w.exists())
 
     def test_auto_off_lands_nothing(self):
-        (self.root / "lockmaster.toml").write_text('[land]\nauto = "off"\n')
+        (self.root / "docketkit.toml").write_text('[land]\nauto = "off"\n')
         self.commit("config")
         w = self.start("W-1", "a.txt")
         (w / "a.txt").write_text("x\n")
         self.assertEqual(land.sync(self.repo(), session="s-1"), [])
 
-    def test_a_worktree_lockmaster_did_not_create_is_adopted_and_kept(self):
+    def test_a_worktree_docketkit_did_not_create_is_adopted_and_kept(self):
         wt = self.root.parent / "elsewhere"
         git(self.root, "worktree", "add", "-q", "-b", "claude/feature", str(wt))
         (wt / "new.txt").write_text("new\n")
@@ -97,7 +97,7 @@ class AutoLand(ScratchCase):
         (wt / "later.txt").write_text("later\n")  # the claim widens with the worktree
         land.sync(self.repo(), session="s-1", cwd=str(wt), final=True)
         self.assertEqual(self.main_file("later.txt"), "later")
-        self.assertTrue(wt.is_dir())  # adopted: never removed by lockmaster
+        self.assertTrue(wt.is_dir())  # adopted: never removed by docketkit
 
     # -------------------------------------------------------- the review's cases
 
@@ -115,7 +115,7 @@ class AutoLand(ScratchCase):
         c = self.repo().load("W-1")
         self.assertEqual(c["status"], LANDED)
         self.assertFalse(w.exists())
-        self.assertEqual(git(self.root, "branch", "--list", "lm/W-1"), "")
+        self.assertEqual(git(self.root, "branch", "--list", "dk/W-1"), "")
 
     def test_the_session_end_drops_a_change_that_never_held_anything(self):
         w = self.start("W-1", "a.txt")
@@ -134,7 +134,7 @@ class AutoLand(ScratchCase):
         self.assertEqual(land.sync(self.repo(), session="s-1", cwd=str(orphan)), ["W-1"])
 
     def test_a_dirty_generated_file_is_not_pending(self):
-        (self.root / "lockmaster.toml").write_text('[generated]\n"gen.txt" = "echo built > gen.txt"\n')
+        (self.root / "docketkit.toml").write_text('[generated]\n"gen.txt" = "echo built > gen.txt"\n')
         self.write_files(self.root, {"gen.txt": "built\n"})
         self.commit("config")
         w = self.start("W-1", "a.txt", "gen.txt")
@@ -151,7 +151,7 @@ class AutoLand(ScratchCase):
         self.assertFalse(land.pending(self.repo(), self.repo().load("W-1")))
 
     def test_a_red_handoff_is_retried_on_the_same_change_once_the_checkout_is_fixed(self):
-        (self.root / "lockmaster.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
+        (self.root / "docketkit.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
         self.commit("config")
         (self.root / "a.txt").write_text("x\n")
         land.handoff(self.repo(), ["a.txt"], "W-6: a")
@@ -168,20 +168,20 @@ class AutoLand(ScratchCase):
     # -------------------------------------------------------- decision 10: drivers registered elsewhere
 
     def test_a_landing_re_points_drivers_registered_on_another_machine(self):
-        from lockmaster import drivers
-        (self.root / "lockmaster.toml").write_text('[merge]\n"a.txt" = "append"\n')
+        from docketkit import drivers
+        (self.root / "docketkit.toml").write_text('[merge]\n"a.txt" = "append"\n')
         self.commit("config")
         for name in ("append", "append-newest-first", "table-rows"):
-            git(self.root, "config", "merge.lockmaster-{}.driver".format(name),
-                "/usr/bin/python3 /elsewhere/lockmaster/merge.py {} %O %A %B %P".format(name))
+            git(self.root, "config", "merge.docketkit-{}.driver".format(name),
+                "/usr/bin/python3 /elsewhere/docketkit/merge.py {} %O %A %B %P".format(name))
         self.assertEqual(len(drivers.stale(self.repo())), 3)
         land.run(self.repo())
         self.assertEqual(drivers.stale(self.repo()), [])
-        self.assertIn(sys.executable, git(self.root, "config", "merge.lockmaster-append.driver"))
+        self.assertIn(sys.executable, git(self.root, "config", "merge.docketkit-append.driver"))
 
     def test_install_on_a_surface_that_cannot_commit_registers_no_driver(self):
-        from lockmaster import install
-        (self.root / "lockmaster.toml").write_text('[merge]\n"a.txt" = "append"\n')
+        from docketkit import install
+        (self.root / "docketkit.toml").write_text('[merge]\n"a.txt" = "append"\n')
         self.commit("config")
         real = surface.can_unlink
         surface.can_unlink = lambda repo: False
@@ -189,8 +189,8 @@ class AutoLand(ScratchCase):
             install.install(self.root, out=lambda *_: None)
         finally:
             surface.can_unlink = real
-        self.assertEqual(git(self.root, "config", "--get-regexp", "merge.lockmaster", check=False), "")
-        self.assertIn("lockmaster-append", (self.root / ".gitattributes").read_text())
+        self.assertEqual(git(self.root, "config", "--get-regexp", "merge.docketkit", check=False), "")
+        self.assertIn("docketkit-append", (self.root / ".gitattributes").read_text())
 
     # -------------------------------------------------------- decision 8a
 
@@ -257,7 +257,7 @@ class AutoLand(ScratchCase):
         self.assertEqual(land.handoffs(self.repo()), [])
 
     def test_a_handoff_that_goes_red_waits_for_new_edits(self):
-        (self.root / "lockmaster.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
+        (self.root / "docketkit.toml").write_text("[checks]\nno-x = {}\n".format(NO_X))
         self.commit("config")
         (self.root / "a.txt").write_text("x\n")
         land.handoff(self.repo(), ["a.txt"], "W-5: x")
@@ -269,7 +269,7 @@ class AutoLand(ScratchCase):
         other = self.root.parent / "mac" / "repo"
         other.parent.mkdir()
         wt = other / ".claude" / "worktrees" / "W-9"
-        git(self.root, "worktree", "add", "-q", "-b", "lm/W-9", str(wt))
+        git(self.root, "worktree", "add", "-q", "-b", "dk/W-9", str(wt))
         os.rename(str(self.root.parent / "mac"), str(self.root.parent / "moved"))
         repo = self.repo()
         repo.state.mkdir(parents=True, exist_ok=True)
@@ -280,7 +280,7 @@ class AutoLand(ScratchCase):
 
     def test_without_a_recorded_home_the_missing_worktrees_are_the_evidence(self):
         other = self.root.parent / "mac" / "repo"
-        git(self.root, "worktree", "add", "-q", "-b", "lm/W-9", str(other / ".claude" / "worktrees" / "W-9"))
+        git(self.root, "worktree", "add", "-q", "-b", "dk/W-9", str(other / ".claude" / "worktrees" / "W-9"))
         os.rename(str(self.root.parent / "mac"), str(self.root.parent / "moved"))
         self.assertFalse(surface.can_commit(self.repo())[0])
 
@@ -300,7 +300,7 @@ class AutoLand(ScratchCase):
 
 class Hook(ScratchCase):
     def hook(self, mode, payload):
-        env = dict(os.environ, LOCKMASTER_SRC=str(SRC), LOCKMASTER_FOREGROUND="1")
+        env = dict(os.environ, DOCKETKIT_SRC=str(SRC), DOCKETKIT_FOREGROUND="1")
         env.pop("CLAUDE_ENV_FILE", None)
         r = subprocess.run([sys.executable, str(HOOK), mode], input=json.dumps(payload), capture_output=True,
                            text=True, env=env, cwd=str(self.root))
@@ -337,8 +337,8 @@ class Hook(ScratchCase):
         import time
         change, _ = land.start(self.repo(), "W-1", ["a.txt"], "s-1")
         Path(change["worktree"], "a.txt").write_text("in the background\n")
-        env = dict(os.environ, LOCKMASTER_SRC=str(SRC))
-        env.pop("LOCKMASTER_FOREGROUND", None)
+        env = dict(os.environ, DOCKETKIT_SRC=str(SRC))
+        env.pop("DOCKETKIT_FOREGROUND", None)
         r = subprocess.run([sys.executable, str(HOOK), "stop"], input=json.dumps({"session_id": "s-1",
                            "cwd": str(self.root)}), capture_output=True, text=True, env=env, cwd=str(self.root))
         self.assertEqual(r.returncode, 0, r.stderr)
@@ -356,7 +356,7 @@ class Hook(ScratchCase):
 
     def test_start_exports_the_session_id(self):
         env_file = self.root.parent / "env"
-        env = dict(os.environ, LOCKMASTER_SRC=str(SRC), CLAUDE_ENV_FILE=str(env_file))
+        env = dict(os.environ, DOCKETKIT_SRC=str(SRC), CLAUDE_ENV_FILE=str(env_file))
         subprocess.run([sys.executable, str(HOOK), "start"], input=json.dumps({"session_id": "s-9", "cwd": str(self.root)}),
                        capture_output=True, text=True, env=env, cwd=str(self.root), check=True)
         self.assertIn("export CLAUDE_SESSION_ID=s-9", env_file.read_text())

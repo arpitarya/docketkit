@@ -92,7 +92,7 @@ into a scan anyone can do at task end.
 
 | Document | Update trigger | Last verified | Notes |
 |---|---|---|---|
-| `CLAUDE.md` | any rule or pointer changes | 2026-10-25 | 2026-10-25 — §Layout: `.github/workflows/release.yml` is lockmaster's own |
+| `CLAUDE.md` | any rule or pointer changes | 2026-10-25 | 2026-10-25 — §Layout: `.github/workflows/release.yml` is docketkit's own |
 | `AGENTS.md` | CLAUDE.md is renamed or the agents it points at change | 2026-10-25 | 2026-10-25 — created at setup |
 | `README.md` | a command, the status or the install steps change | 2026-10-25 | 2026-10-25 — status 0.0.1, `pip install` |
 | `CHANGELOG.md` | a user-visible change lands; a release is cut | 2026-10-25 | 2026-10-25 — [0.0.1] cut; the release pipeline |
@@ -106,12 +106,12 @@ into a scan anyone can do at task end.
 | `work/INTERVIEW.md` | direction, a decision or the live state changes — during the session | 2026-11-07 | 2026-11-07 — docket rulings; next is milo's install (W-15) |
 | `work/IMPLEMENTATION.md` | something lands | 2026-10-25 | 2026-10-25 — W-08 step 1 row |
 | `work/WORKLOG.md` | every session, before it ends — chat-only ones too | 2026-11-07 | 2026-11-07 — the docket session |
-| `work/NOW.md` | kept by hooks and every landing: a row per live session; empty when nothing runs | 2026-10-25 | 2026-10-25 — written through `lockmaster status --now`'s renderer (W-07) |
+| `work/NOW.md` | kept by hooks and every landing: a row per live session; empty when nothing runs | 2026-10-25 | 2026-10-25 — written through `docketkit status --now`'s renderer (W-07) |
 | `work/LESSONS.md` | a failure teaches something durable | 2026-10-25 | 2026-10-25 — created at setup |
-| `work/MACHINE.md` | a surface breaks in a way the code did not cause; the budget is ruled (L2) | 2026-10-25 | 2026-10-25 — the Cowork row names `lockmaster install .` |
+| `work/MACHINE.md` | a surface breaks in a way the code did not cause; the budget is ruled (L2) | 2026-10-25 | 2026-10-25 — the Cowork row names `docketkit install .` |
 | `work/compare/README.md` | a fork opens, closes, or its trigger fires | 2026-10-25 | 2026-10-25 — created at setup |
 | `work/proposals/README.md` | an idea is filed, graduates, or is rejected | 2026-10-25 | 2026-10-25 — created at setup |
-| `docs/GLOSSARY.md` | a term is coined or redefined | 2026-10-25 | 2026-10-25 — land lock, left behind, lockmaster.lock; red redefined |
+| `docs/GLOSSARY.md` | a term is coined or redefined | 2026-10-25 | 2026-10-25 — land lock, left behind, docketkit.lock; red redefined |
 | `records/README.md` | a record's state, ownership or number changes | 2026-10-25 | 2026-10-25 — ownership: `scripts/release.py`, `.github/workflows/release.yml` |
 | `records/TEMPLATE.md` | the convention changes | 2026-10-25 | 2026-10-25 — created at setup |
 

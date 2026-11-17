@@ -6,7 +6,7 @@ from contextlib import redirect_stderr, redirect_stdout
 
 from support import ScratchCase
 
-from lockmaster.cli import COMMANDS, main
+from docketkit.cli import COMMANDS, main
 
 
 class Contract(unittest.TestCase):

@@ -1,13 +1,13 @@
 """Thin wrappers over the `git` command — SR-ARCHITECTURE decision 1.
 
-Every git operation lockmaster runs goes through `run`, so the forbidden forms
+Every git operation docketkit runs goes through `run`, so the forbidden forms
 of SR-LAW-3 decision 3 have one place to be kept out of. Nothing here forces.
 """
 import os
 import subprocess
 import time
 
-#: `-c core.hooksPath=…` while a Repo is open: lockmaster's own git steps run the
+#: `-c core.hooksPath=…` while a Repo is open: docketkit's own git steps run the
 #: repository's gate hooks and not its post-* hooks (SR-ARCHITECTURE decision 18).
 HOOKS = []
 

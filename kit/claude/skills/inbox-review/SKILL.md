@@ -1,13 +1,13 @@
 ---
-name: docket
-description: Walk Arpit through work/OPEN-WORK.md one item at a time — the decider's inbox first, then the open items — explaining each in plain words, recommending a ruling or next move, and writing his rulings back once he confirms. Use on /docket, "go through open work", "what's waiting on me", "walk me through the queue/inbox", "explain the open items".
+name: inbox-review
+description: Walk Arpit through work/OPEN-WORK.md one item at a time — the decider's inbox first, then the open items — explaining each in plain words, recommending a ruling or next move, and writing his rulings back once he confirms. Use on /inbox-review, "go through open work", "what's waiting on me", "walk me through the queue/inbox", "explain the open items".
 ---
 
-# Docket — the queue, one case at a time
+# Inbox review — the queue, one case at a time
 
 **Takes** `work/OPEN-WORK.md`. **Gives** one card per item, a recommendation, and Arpit's ruling written back.
 
-**Docket holds no rules.** Every rule it follows lives in the record named in OPEN-WORK's frontmatter (`governed_by_path`) and the records it points to — here, SR-WORK-OPEN-QUEUE, with SR-WORK-DOCS, SR-WORK-SESSION and SR-WORK-BLOCKERS. Where this skill and a record disagree, the record wins (SR-LAW-0): say so, and fix the skill.
+**Inbox review holds no rules.** Every rule it follows lives in the record named in OPEN-WORK's frontmatter (`governed_by_path`) and the records it points to — here, SR-WORK-OPEN-QUEUE, with SR-WORK-DOCS, SR-WORK-SESSION and SR-WORK-BLOCKERS. Where this skill and a record disagree, the record wins (SR-LAW-0): say so, and fix the skill.
 
 ## 1 · Prepare — silently, before the first card
 
@@ -18,7 +18,7 @@ description: Walk Arpit through work/OPEN-WORK.md one item at a time — the dec
 
 ## 2 · Open — one short block
 
-- Line 1: `Docket: N rulings owed · M open items · D drift`.
+- Line 1: `Inbox review: N rulings owed · M open items · D drift`.
 - An open blocker in `BLOCKED.json` is named first.
 - The inbox rows rule 41 says to name, each with its age; 🔺 first (rule 33).
 - Drift: one line each.
@@ -75,7 +75,7 @@ A 🟡 card carries its blocker in the header, as its row does: `**[k/N] 🟡 W-
 ## 6 · Close
 
 - One line: `Ruled X · skipped Y · drift fixed Z · next: <the single next step>`.
-- Append the worklog entry (SR-WORK-SESSION decision 1 — a docket with no rulings still counts) and set `work/NOW.md`.
+- Append the worklog entry (SR-WORK-SESSION decision 1 — an inbox review with no rulings still counts) and set `work/NOW.md`.
 
 ## Never
 

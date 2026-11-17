@@ -5,7 +5,7 @@ import unittest
 
 from support import ScratchCase, git
 
-from lockmaster.merge import merge_lines
+from docketkit.merge import merge_lines
 
 WORKLOG = "# WORKLOG\n\n---\n\n## 2026-10-01 — first\n\n- done\n"
 QUEUE = "# OPEN-WORK\n\n| item | what |\n|---|---|\n| W-01 | one |\n\n## end\n"
@@ -45,17 +45,17 @@ class Engine(unittest.TestCase):
 
 
 class InPlainGit(ScratchCase):
-    """The drivers installed by `lockmaster drivers`, run by a plain `git merge`."""
+    """The drivers installed by `docketkit drivers`, run by a plain `git merge`."""
 
     files = {"work/WORKLOG.md": WORKLOG, "work/OPEN-WORK.md": QUEUE, "work/LESSONS.md": LESSONS,
-             "lockmaster.toml": '[merge]\n"work/WORKLOG.md" = "append-newest-first"\n'
+             "docketkit.toml": '[merge]\n"work/WORKLOG.md" = "append-newest-first"\n'
                                 '"work/OPEN-WORK.md" = "table-rows"\n"work/LESSONS.md" = "append"\n'}
 
     def setUp(self):
         super().setUp()
         code, out, err = self.cli("drivers")
         self.assertEqual(code, 0, err)
-        self.assertIn("merge=lockmaster-table-rows", (self.root / ".gitattributes").read_text())
+        self.assertIn("merge=docketkit-table-rows", (self.root / ".gitattributes").read_text())
         self.commit("attributes")
 
     def branch_edit(self, name, edits):
@@ -101,7 +101,7 @@ class InPlainGit(ScratchCase):
         self.cli("drivers")
         text = attrs.read_text()
         self.assertTrue(text.startswith("*.png binary\n"))
-        self.assertEqual(text.count("lockmaster:begin"), 1)
+        self.assertEqual(text.count("docketkit:begin"), 1)
 
 
 if __name__ == "__main__":
