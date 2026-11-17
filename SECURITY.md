@@ -11,15 +11,15 @@ You'll get an acknowledgement within 5 working days, and a fix or a plan within 
 
 ## What counts
 
-lockmaster runs git commands and the checks a repository configures, and
+docketkit runs git commands and the checks a repository configures, and
 writes to `main`, so these are in scope:
 
 - a landing that **loses** a commit, a file or a branch not already in `main`;
-- a crafted `lockmaster.toml`, branch name or path that makes lockmaster **run
+- a crafted `docketkit.toml`, branch name or path that makes docketkit **run
   a command it was not configured to run**, or write outside the repository;
 - a claim that lets a change land paths **outside** it;
 - anything in a published package that differs from what's in this repository.
 
 ## Supported versions
 
-lockmaster has no release yet. Fixes go into `main`.
+docketkit has no release yet. Fixes go into `main`.

@@ -13,7 +13,7 @@ is added when something fails for a reason the code did not cause.
 | macOS laptop (zsh) | `timeout: command not found` | GNU coreutils is not installed | leave `timeout` out; use the tool's own timeout |
 | macOS laptop (zsh) | a script using 3.10+ syntax fails | `python3` is 3.9.6 here | keep every script and hook to Python 3.9 syntax (SR-ARCHITECTURE decision 2) |
 | Cowork bridge (`device_bash`) | `rm`, `git commit`, `git worktree remove` fail with `Operation not permitted`, or leave `.git/index.lock` | the bridge cannot unlink | read-only git with `git --no-optional-locks`; commit, install and clean up on the Mac |
-| Cowork bridge (file tools) | writes under `.claude/` or `.github/` are refused | remote tools may not change agent or CI config | edit `kit/`, then run `PYTHONPATH=src python3 -m lockmaster install .` on the Mac |
+| Cowork bridge (file tools) | writes under `.claude/` or `.github/` are refused | remote tools may not change agent or CI config | edit `kit/`, then run `PYTHONPATH=src python3 -m docketkit install .` on the Mac |
 | Claude Code cloud session | creating a GitHub repository is refused | the session is bound to its configured repositories | create it at github.com/new, then attach it |
 
 ## Disk budget — law L2: this section is always followed
@@ -31,4 +31,4 @@ changes only by the decider's ruling. `.claude/hooks/disk-budget.py` reads the
 | approvals reset | when the project is back under the budget |
 | not counted | shared caches outside the repo: `~/.cargo`, the pnpm store, pip's cache |
 | see it | `python3 .claude/hooks/disk-budget.py fresh` |
-| at filing (2026-10-25) | lockmaster is under 1 MB — a new repository |
+| at filing (2026-10-25) | docketkit is under 1 MB — a new repository |

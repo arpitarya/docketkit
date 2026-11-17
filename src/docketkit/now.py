@@ -3,9 +3,9 @@
 The sessions in `## In flight` are the sessions' own (now-ledger.py adds and
 closes them, a Cowork session by hand). What is computed is everything else:
 a resource row whose path is gone leaves, and the file is always written in
-one canonical shape. `render` is that computation; `lockmaster status --now`
+one canonical shape. `render` is that computation; `docketkit status --now`
 prints it, every landing writes it, and the kit's now-ledger.py writes
-through it, so NOW.md equals `lockmaster status --now` after each of them.
+through it, so NOW.md equals `docketkit status --now` after each of them.
 """
 import os
 import re

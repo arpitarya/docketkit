@@ -8,7 +8,7 @@ import unittest
 
 from support import ROOT, ScratchCase, git
 
-from lockmaster import land
+from docketkit import land
 
 HOOKS = ROOT / "kit" / "claude" / "hooks"
 
@@ -50,14 +50,14 @@ class BlockMain(ScratchCase):
     def test_commits_on_main_and_unplain_pushes_of_main_are_refused(self):
         for cmd in ("git commit -m x", "git add . && git commit -am 'x y'", "git -C {} commit -m x".format(self.root),
                     "git push -f origin main", "git push --force-with-lease", "git push origin +main",
-                    "git push origin +lm/x:main", "git push origin :main", "git push --delete origin main",
+                    "git push origin +dk/x:main", "git push origin :main", "git push --delete origin main",
                     "git push --no-verify origin main", "git push --all", "git push --mirror",
-                    "git merge lm/W-1", "FOO=1 git cherry-pick abc", "cd {} && git commit -m x".format(self.root),
+                    "git merge dk/W-1", "FOO=1 git cherry-pick abc", "cd {} && git commit -m x".format(self.root),
                     "cat <<EOF\nhello\nEOF\ngit commit -m x"):
             with self.subTest(cmd):
                 reason = self.bash(cmd)
                 self.assertIsNotNone(reason, cmd)
-                self.assertIn("lockmaster submit", reason)
+                self.assertIn("docketkit submit", reason)
 
     def test_a_plain_push_of_main_passes(self):
         # Ruled 2026-10-26: main holds only landings, so a push that cannot force may send it.
@@ -72,25 +72,25 @@ class BlockMain(ScratchCase):
             with self.subTest(cmd):
                 self.assertIsNone(self.bash(cmd), cmd)
 
-    def test_work_on_a_change_branch_and_lockmasters_landing_pass(self):
+    def test_work_on_a_change_branch_and_docketkits_landing_pass(self):
         change, _ = land.start(self.repo(), "W-1", ["a.txt"])
         wt = change["worktree"]
-        for cmd, cwd in (("git commit -m wip", wt), ("git push origin lm/W-1", wt), ("lockmaster submit -m x", wt),
+        for cmd, cwd in (("git commit -m wip", wt), ("git push origin dk/W-1", wt), ("docketkit submit -m x", wt),
                          ("git status && git log", self.root), ("git merge --abort", self.root),
-                         ("git push origin lm/W-1", self.root), ("echo git commit", self.root)):
+                         ("git push origin dk/W-1", self.root), ("echo git commit", self.root)):
             with self.subTest(cmd):
                 self.assertIsNone(self.bash(cmd, cwd), cmd)
 
-    def test_the_main_branch_comes_from_lockmaster_toml(self):
+    def test_the_main_branch_comes_from_docketkit_toml(self):
         git(self.root, "branch", "-m", "main", "trunk")
-        (self.root / "lockmaster.toml").write_text('[main]\nbranch = "trunk"\n')
+        (self.root / "docketkit.toml").write_text('[main]\nbranch = "trunk"\n')
         self.assertIsNotNone(self.bash("git commit -m x"))
         self.assertIsNotNone(self.bash("git push origin +trunk"))
         self.assertIsNone(self.bash("git push origin +main"))  # main is not this repository's main
 
 
 class WithoutTheWorkSystem(ScratchCase):
-    """W-09: a repository that has lockmaster but not the work system (no
+    """W-09: a repository that has docketkit but not the work system (no
     work/NOW.md — `install` scaffolds one since W-18, so it was removed) gets no
     NOW ledger and no progress nudge — and no traceback."""
 

@@ -1,22 +1,23 @@
 {
   "files": {
-    ".claude/hooks/auto-land.py": "3d0e5b76a98236b8d3bb9d2a6ed79a20c935cb1345f32e973456d6169d5bbb3d",
-    ".claude/hooks/block-main.py": "b32764ae5c71a0ac7319ee5ef5572fc5d74850ebb2fc08e6c437d56d88ad1a73",
-    ".claude/hooks/claim-guard.py": "ad102d604eda2d9a0383850dec08e99e9d6e3e51e836e90c59c0498fe75b49dc",
+    ".claude/hooks/auto-land.py": "6b4c4542a909b235609eeeb94ea1b9e877b4456eb059d1535b63879a8bfd52de",
+    ".claude/hooks/block-main.py": "7e7edc9bc57b746bb68d9d90ffba04eba433d80c3fea0e08c26b67119fe79261",
+    ".claude/hooks/claim-guard.py": "bc48e57cbe0ebbfb34fe2b3a66943a8d59ad52b420e33ef538c518d4180f85d3",
     ".claude/hooks/disk-budget.py": "56ac3beaf5cbff2e17acae976d45d8eee5be3fedeb7a62507167ccd408d324cc",
     ".claude/hooks/guard-open-work-inbox.sh": "2100bea49ebe037c7c0b35cedef6c4a2f5e8189c4ea3e7d76e7292e44737d10c",
     ".claude/hooks/inject-inbox.sh": "091a13576448241782ae330d03ee5afbdc34e8fd46b7494c51a91acbda282a1b",
-    ".claude/hooks/now-ledger.py": "df88b3ffe4c225fa179f114289ba4da0f5caaf08553efe03a112cb6d82bfdb0e",
+    ".claude/hooks/now-ledger.py": "00f9889b779106706717413fa5cc938218c9bc268aaecbf2e571720cba53fe56",
     ".claude/hooks/release-locks.sh": "da32d663fae1edd12dd3b26d7744f6f062af80c3e53f4882490162cc25d7d659",
     ".claude/hooks/require-progress.sh": "1f18eb786a477a21c0b27fa3abb95a27d78d157be339a6f8ef64398ca76a7d29",
     ".claude/hooks/session-lock.sh": "febe0bec484001ae2a10f0133da2e830a1ecbe161a6509a2646bd1ce0a2283f8",
     ".claude/hooks/stop-if-blocked.sh": "18f8fdbe8ca93dfc2008a4f73ac7cd04ef6bc780ae8899b680ee3f4fa1281c45",
-    ".claude/hooks/work-files.py": "cd46eebe7c00e7a404b40ce43f97bd384106b5a2bb776888ec693875bacd2e5e",
-    ".claude/hooks/worktree-cleanup.py": "a63bec759e3d9f6f7c01ff47c718e12aa7a35c082b68ceaa8ffadaf429b24507",
+    ".claude/hooks/work-files.py": "444ca6bc085d0e26d3e27db7a08858c58d548dd26e9216743247aab013321784",
+    ".claude/hooks/worktree-cleanup.py": "d1efc6e992f3ea24e18dac278b7dd0331ae509eda61d5183bca09d91e2a68481",
     ".claude/skills/docket/SKILL.md": "86e2b5e7b7144285d884f547e02dfca80dd403df86f1f7640fd710088560b093",
-    ".claude/skills/landing/SKILL.md": "8b0ecf1f87f180e8fa9e125ab8bfddfa78872346a00c3e95728e973d330af8b0"
+    ".claude/skills/inbox-review/SKILL.md": "0fa34b1b3ace731aea1302e50420673d41dc00ff90c89d88f66cdb84dad78987",
+    ".claude/skills/landing/SKILL.md": "f4747064bea98e46d155357171e3ffea2e8b657da299f0716dbd10b122a848f7"
   },
-  "kit": "e24d51c9144ede669d4d0e6b7d3634f7523da0de50ae9979e45d48875cb1da46",
+  "kit": "791b94d87c748aeb0afb233305680dca2e3b2b942952449df83a1801e46b4290",
   "settings": [
     "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-open-work-inbox.sh",
     "$CLAUDE_PROJECT_DIR/.claude/hooks/inject-inbox.sh",

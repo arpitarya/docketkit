@@ -1,4 +1,4 @@
-# CLAUDE.md — the agent contract for lockmaster
+# CLAUDE.md — the agent contract for docketkit
 
 This file is binding. It carries **pointers, never rules**: every rule lives in
 exactly one record under [`records/`](records/README.md) and nothing here
@@ -32,7 +32,7 @@ decision 13.
 | you want | read |
 |---|---|
 | what to work on next | [`work/OPEN-WORK.md`](work/OPEN-WORK.md) — **the single live queue** |
-| the queue explained one item at a time, with a recommendation, rulings written back | `/docket` — [`.claude/skills/docket/SKILL.md`](.claude/skills/docket/SKILL.md) |
+| the queue explained one item at a time, with a recommendation, rulings written back | `/inbox-review` — [`.claude/skills/inbox-review/SKILL.md`](.claude/skills/inbox-review/SKILL.md) |
 | what has been named and nobody is doing | [`work/BACKLOG.md`](work/BACKLOG.md) |
 | the judgment behind the current state | [`work/INTERVIEW.md`](work/INTERVIEW.md) |
 | what has actually shipped | [`work/IMPLEMENTATION.md`](work/IMPLEMENTATION.md) |
@@ -50,7 +50,7 @@ decision 13.
 | which record owns a module | [`records/README.md`](records/README.md) §Ownership |
 | which file governs what | [SR-WORK-GOVERNANCE](records/0059_WORK-governance.md) |
 | the whole set of rules about how work is done | the **WORK** records `0051`–`0062` |
-| what lockmaster is and how a landing works | [SR-ARCHITECTURE](records/0101_architecture.md) |
+| what docketkit is and how a landing works | [SR-ARCHITECTURE](records/0101_architecture.md) |
 
 Any work item that starts, finishes, blocks or is descoped updates
 `OPEN-WORK.md` **in the same change as the work**. The record is the spec;
@@ -63,14 +63,14 @@ Each law is stated in exactly one record and is **not restated here**:
 - **L0** — SRs are the only source of truth; Law records outrank every other record — [SR-LAW-0](records/0002_LAW-0-authority.md)
 - **L1** — a retired record is archived, never deleted — [SR-LAW-1](records/0003_LAW-1-retired-records-archived.md)
 - **L2** — `work/MACHINE.md`'s budget section is always followed — 5 GB of disk per project, all agents combined; every GB past it needs the decider's approval — [SR-LAW-2](records/0004_LAW-2-machine-budget.md)
-- **L3** — lockmaster never loses work — never a forced git operation; what would lose data stops red for the decider — [SR-LAW-3](records/0005_LAW-3-never-lose-work.md)
+- **L3** — docketkit never loses work — never a forced git operation; what would lose data stops red for the decider — [SR-LAW-3](records/0005_LAW-3-never-lose-work.md)
 - **L4** — zero runtime dependencies — the Python standard library alone — [SR-LAW-4](records/0006_LAW-4-zero-dependencies.md)
-- **L5** — git stays the store — every landing is a plain git commit; lockmaster keeps no history of its own — [SR-LAW-5](records/0007_LAW-5-git-stays-the-store.md)
+- **L5** — git stays the store — every landing is a plain git commit; docketkit keeps no history of its own — [SR-LAW-5](records/0007_LAW-5-git-stays-the-store.md)
 - **L6** — Python only — one package, on PyPI and nowhere else; no npm — [SR-LAW-6](records/0008_LAW-6-python-only.md)
-- **L7** — no model in the lander — lockmaster never calls an AI model — [SR-LAW-7](records/0009_LAW-7-no-model-in-the-lander.md)
-- **L8** — lockmaster handles parallel requests — every request served or queued, never lost, never left for a person — [SR-LAW-8](records/0010_LAW-8-parallel-requests.md)
+- **L7** — no model in the lander — docketkit never calls an AI model — [SR-LAW-7](records/0009_LAW-7-no-model-in-the-lander.md)
+- **L8** — docketkit handles parallel requests — every request served or queued, never lost, never left for a person — [SR-LAW-8](records/0010_LAW-8-parallel-requests.md)
 - **L9** — Cowork and Claude Code work in parallel with no manual step — every change reaches `main` without the decider — [SR-LAW-9](records/0011_LAW-9-cowork-and-claude-code-together.md)
-- **L10** — the work files are always up to date, wherever lockmaster is used — OPEN-WORK, BACKLOG, INTERVIEW, MACHINE, LESSONS, WORKLOG, by whoever works there — [SR-LAW-10](records/0012_LAW-10-work-files-current.md)
+- **L10** — the work files are always up to date, wherever docketkit is used — OPEN-WORK, BACKLOG, INTERVIEW, MACHINE, LESSONS, WORKLOG, by whoever works there — [SR-LAW-10](records/0012_LAW-10-work-files-current.md)
 
 [SR-LAWS](records/0001_LAWS.md) assigns the handles and routes each to its
 record; that is all it does. Add a law by adding a record in the law range and
@@ -120,19 +120,19 @@ work/        THE SHARED MEMORY between sessions — start at work/README.md
 records/     THE STANDING RECORDS — the register, the template, the laws, the WORK records, SR-ARCHITECTURE
 docs/        WHAT THE PROJECT IS — the glossary
 archive/     THE ONE ARCHIVE — everything retired, mirroring the live tree
-src/         THE TOOL — the `lockmaster` package, Python ≥ 3.9, standard library only
+src/         THE TOOL — the `docketkit` package, Python ≥ 3.9, standard library only
 tests/       scratch-repo tests, one per decision as it is built
-kit/         WHAT LOCKMASTER INSTALLS — kit/claude → .claude/ (kit/github is empty: CI stays each repo's own)
+kit/         WHAT DOCKETKIT INSTALLS — kit/claude → .claude/ (kit/github is empty: CI stays each repo's own)
 scripts/     the commit guard and the work-system checks
-.claude/     installed from kit/claude by `lockmaster install .` — edit kit/, never the copy
-.github/     lockmaster's own — workflows/ci.yml and workflows/release.yml, edited here; never in kit/
-lockmaster.toml  this repo's own landing rules: its checks and merge drivers
+.claude/     installed from kit/claude by `docketkit install .` — edit kit/, never the copy
+.github/     docketkit's own — workflows/ci.yml and workflows/release.yml, edited here; never in kit/
+docketkit.toml  this repo's own landing rules: its checks and merge drivers
 ```
 
-**Dogfooding.** lockmaster is built with the work system it will install.
+**Dogfooding.** docketkit is built with the work system it will install.
 Change a hook in `kit/claude/hooks/`, then run
-`PYTHONPATH=src python3 -m lockmaster install .` to install it here; an edit
-made only in `.claude/` is reported by `lockmaster doctor` and overwritten by
+`PYTHONPATH=src python3 -m docketkit install .` to install it here; an edit
+made only in `.claude/` is reported by `docketkit doctor` and overwritten by
 the next install. Once the kit is installed, an agent session cannot commit to
-`main`: work goes through `lockmaster start` / `submit`
+`main`: work goes through `docketkit start` / `submit`
 ([SR-ARCHITECTURE](records/0101_architecture.md) decision 12).

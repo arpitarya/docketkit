@@ -1,4 +1,4 @@
-"""The `lockmaster` command — SR-ARCHITECTURE decision 14.
+"""The `docketkit` command — SR-ARCHITECTURE decision 14.
 
 Python >= 3.9, standard library only (decision 2). Exit codes: 0 done, 1 a
 change went red or a check found a problem, 2 refused or misused.
@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 
-from lockmaster import __version__
+from docketkit import __version__
 
 # command -> what it does (decision 14's table)
 COMMANDS = {
@@ -24,16 +24,16 @@ COMMANDS = {
     "can-commit": "say whether this surface can commit (exit 0) or must hand off (exit 1)",
     "doctor": "stale locks, orphan worktrees, unmerged branches, kit mismatch",
     "install": "install the kit into a repository, pinned",
-    "regen": "rebuild the generated files lockmaster.toml lists",
+    "regen": "rebuild the generated files docketkit.toml lists",
     "drivers": "register the structural merge drivers; write .gitattributes from [merge]",
     "merge-driver": "what git runs for a structural merge (installed by `drivers`)",
 }
 
 
 def _parser():
-    p = argparse.ArgumentParser(prog="lockmaster",
+    p = argparse.ArgumentParser(prog="docketkit",
                                 description="Lands AI-agent changes into main one at a time, without ever losing work.")
-    p.add_argument("--version", action="version", version="lockmaster " + __version__)
+    p.add_argument("--version", action="version", version="docketkit " + __version__)
     sub = p.add_subparsers(dest="command", metavar="<command>")
 
     s = sub.add_parser("start", help=COMMANDS["start"])
@@ -73,7 +73,7 @@ def _parser():
     s.add_argument("--session", default="")
     s.add_argument("--cwd", default="")
     s.add_argument("--final", action="store_true", help="the session is ending: land and clean up")
-    s.add_argument("--no-adopt", action="store_true", help="do not adopt a worktree lockmaster did not create")
+    s.add_argument("--no-adopt", action="store_true", help="do not adopt a worktree docketkit did not create")
     s.add_argument("--pickup", action="store_true", help="then land the handoffs too")
 
     sub.add_parser("can-commit", help=COMMANDS["can-commit"])
@@ -83,7 +83,7 @@ def _parser():
     s = sub.add_parser("install", help=COMMANDS["install"])
     s.add_argument("repo", nargs="?", default=".")
     s.add_argument("--backup", action="store_true",
-                   help="move each file the kit would replace aside to <file>.pre-lockmaster")
+                   help="move each file the kit would replace aside to <file>.pre-docketkit")
 
     sub.add_parser("regen", help=COMMANDS["regen"])
     sub.add_parser("drivers", help=COMMANDS["drivers"])
@@ -94,8 +94,8 @@ def _parser():
 
 
 def main(argv=None):
-    from lockmaster.config import ConfigError
-    from lockmaster.repo import LockmasterError
+    from docketkit.config import ConfigError
+    from docketkit.repo import DocketkitError
 
     args = _parser().parse_args(argv)
     if not args.command:
@@ -103,8 +103,8 @@ def main(argv=None):
         return 0
     try:
         return _dispatch(args)
-    except (LockmasterError, ConfigError) as e:
-        print("lockmaster {}: {}".format(args.command, e), file=sys.stderr)
+    except (DocketkitError, ConfigError) as e:
+        print("docketkit {}: {}".format(args.command, e), file=sys.stderr)
         return 2
 
 
@@ -113,7 +113,7 @@ def _out(text):
 
 
 def _save(repo, args):
-    from lockmaster import land, surface
+    from docketkit import land, surface
     paths = land._relative(repo, args.paths)
     ok, why = (False, "asked to hand off") if args.handoff else surface.can_commit(repo)
     if ok:
@@ -132,14 +132,14 @@ def _save(repo, args):
 
 
 def _dispatch(args):
-    from lockmaster import land
-    from lockmaster.repo import Repo
+    from docketkit import land
+    from docketkit.repo import Repo
 
     if args.command == "merge-driver":
-        from lockmaster import merge
+        from docketkit import merge
         return merge.main(args.args)
     if args.command == "install":
-        from lockmaster import install
+        from docketkit import install
         install.install(args.repo, backup=args.backup, out=_out)
         return 0
 
@@ -187,13 +187,13 @@ def _dispatch(args):
             land.pickup(repo, out=_out)
         return 0
     if args.command == "can-commit":
-        from lockmaster import surface
+        from docketkit import surface
         ok, why = surface.can_commit(repo)
-        print("yes — this surface lands its own changes" if ok else "no — {}; `lockmaster save` hands "
+        print("yes — this surface lands its own changes" if ok else "no — {}; `docketkit save` hands "
               "edits to the next Claude Code session".format(why))
         return 0 if ok else 1
     if args.command == "status":
-        from lockmaster import now, status
+        from docketkit import now, status
         if args.write_now:
             print("work/NOW.md " + ("written" if now.write_if_present(repo) else "not kept here"))
             return 0
@@ -203,17 +203,17 @@ def _dispatch(args):
         print("\n".join(status.report(repo)))
         return 0
     if args.command == "doctor":
-        from lockmaster import doctor
+        from docketkit import doctor
         problems = doctor.check(repo)
         print("\n".join(problems) if problems else "all well")
         return 1 if problems else 0
     if args.command == "regen":
-        from lockmaster import generated
+        from docketkit import generated
         done = generated.regen(repo.toplevel, repo.config)
-        print("rebuilt: " + (", ".join(done) if done else "nothing — lockmaster.toml lists no [generated] paths"))
+        print("rebuilt: " + (", ".join(done) if done else "nothing — docketkit.toml lists no [generated] paths"))
         return 0
     if args.command == "drivers":
-        from lockmaster import drivers
+        from docketkit import drivers
         changed = drivers.install(repo)
         print("merge drivers registered in .git/config"
               + ("; .gitattributes written — commit it" if changed else ""))

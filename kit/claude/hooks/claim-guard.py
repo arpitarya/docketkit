@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """PreToolUse(Write|Edit|MultiEdit|NotebookEdit) — SR-ARCHITECTURE decision 5.
 
-A write inside a lockmaster change's worktree to a path outside its claim is
+A write inside a docketkit change's worktree to a path outside its claim is
 WARNED, not refused: the hook prints the claim and the path, to the session
 and to the person watching. Only claimed paths land; the rest is left behind,
 so the agent should know before it writes, not after it submits.
 
 A write in the primary checkout to a path a live change claims is WARNED too
 (W-10): that uncommitted edit would make the change's landing wait. Edit it in
-the change's worktree, or land it with `lockmaster save`. `work/NOW.md`, the
+the change's worktree, or land it with `docketkit save`. `work/NOW.md`, the
 live ledger, is left out: it is always edited there.
 
-The claim is read from lockmaster's state, `$(git rev-parse
---git-common-dir)/lockmaster/changes/<item>.json`. A write anywhere else (a
+The claim is read from docketkit's state, `$(git rev-parse
+--git-common-dir)/docketkit/changes/<item>.json`. A write anywhere else (a
 worktree that is no change's) is not this hook's business.
-Standard library only; it does not need lockmaster installed.
+Standard library only; it does not need docketkit installed.
 """
 import fnmatch
 import json
@@ -35,7 +35,7 @@ def norm(path):
 
 
 def claimed(path, claims):
-    """The same rule as lockmaster's repo.claimed: a claim names the path, a
+    """The same rule as docketkit's repo.claimed: a claim names the path, a
     directory above it, or a glob matching it."""
     path = norm(path)
     for c in map(norm, claims):
@@ -61,7 +61,7 @@ def _locate(file_path):
     if not top or not common:
         return [], None, None, False
     common = Path(common) if os.path.isabs(common) else Path(d) / common
-    changes = common / "lockmaster" / "changes"
+    changes = common / "docketkit" / "changes"
     if not changes.is_dir():
         return [], None, None, False
     live = []
@@ -114,15 +114,15 @@ def main():
         rel, others = claimants_in_checkout(p)
         if not others:
             return 0
-        msg = ("lockmaster: {} claims `{}`; edit it in its worktree ({}) or land this edit through lockmaster "
-               "(`lockmaster save`). Left uncommitted here, it makes {} wait to land.").format(
+        msg = ("docketkit: {} claims `{}`; edit it in its worktree ({}) or land this edit through docketkit "
+               "(`docketkit save`). Left uncommitted here, it makes {} wait to land.").format(
             " and ".join(c["item"] for c in others), rel,
             ", ".join(c.get("worktree", "?") for c in others), "that change" if len(others) == 1 else "them")
     elif claimed(rel, change.get("paths", [])):
         return 0
     else:
-        msg = ("lockmaster: `{}` is outside the claim of {} ({}). It will be left behind, not landed. "
-               "If it belongs to this change: `lockmaster claim add {}`.").format(
+        msg = ("docketkit: `{}` is outside the claim of {} ({}). It will be left behind, not landed. "
+               "If it belongs to this change: `docketkit claim add {}`.").format(
             rel, change["item"], ", ".join(change.get("paths", [])) or "nothing claimed", rel)
     print(json.dumps({"systemMessage": msg,
                       "hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": msg}}))

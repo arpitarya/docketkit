@@ -3,8 +3,8 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lockmaster"
-dynamic = ["version"]           # one source: lockmaster.__version__ (src/lockmaster/__init__.py)
+name = "docketkit"
+dynamic = ["version"]           # one source: docketkit.__version__ (src/docketkit/__init__.py)
 description = "Lands AI-agent changes into main one at a time, without ever losing work."
 readme = "README.md"
 license = "MIT"
@@ -26,58 +26,59 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/arpitarya/lockmaster"
-Changelog = "https://github.com/arpitarya/lockmaster/blob/main/CHANGELOG.md"
-Issues = "https://github.com/arpitarya/lockmaster/issues"
+Homepage = "https://github.com/arpitarya/docketkit"
+Changelog = "https://github.com/arpitarya/docketkit/blob/main/CHANGELOG.md"
+Issues = "https://github.com/arpitarya/docketkit/issues"
 
 [project.scripts]
-lockmaster = "lockmaster.cli:main"
+docketkit = "docketkit.cli:main"
+dk = "docketkit.cli:main"
 
 [tool.setuptools]
-# kit/ ships inside the package as lockmaster/kit, so `lockmaster install`
+# kit/ ships inside the package as docketkit/kit, so `docketkit install`
 # works from a pip install (SR-ARCHITECTURE decision 15).
-package-dir = { "" = "src", "lockmaster.kit" = "kit" }
+package-dir = { "" = "src", "docketkit.kit" = "kit" }
 # Every kit/ directory is listed; tests/test_packaging.py fails when one is not.
 packages = [
-  "lockmaster",
-  "lockmaster.kit",
-  "lockmaster.kit.claude",
-  "lockmaster.kit.claude.hooks",
-  "lockmaster.kit.claude.skills",
-  "lockmaster.kit.claude.skills.docket",
-  "lockmaster.kit.claude.skills.landing",
-  "lockmaster.kit.work",
-  "lockmaster.kit.scaffold",
-  "lockmaster.kit.scaffold._archive",
-  "lockmaster.kit.scaffold.docs",
-  "lockmaster.kit.scaffold.records",
-  "lockmaster.kit.scaffold.scripts",
-  "lockmaster.kit.scaffold.work",
-  "lockmaster.kit.scaffold.work.compare",
-  "lockmaster.kit.scaffold.work.open",
-  "lockmaster.kit.scaffold.work.proposals",
+  "docketkit",
+  "docketkit.kit",
+  "docketkit.kit.claude",
+  "docketkit.kit.claude.hooks",
+  "docketkit.kit.claude.skills",
+  "docketkit.kit.claude.skills.inbox-review",
+  "docketkit.kit.claude.skills.landing",
+  "docketkit.kit.work",
+  "docketkit.kit.scaffold",
+  "docketkit.kit.scaffold._archive",
+  "docketkit.kit.scaffold.docs",
+  "docketkit.kit.scaffold.records",
+  "docketkit.kit.scaffold.scripts",
+  "docketkit.kit.scaffold.work",
+  "docketkit.kit.scaffold.work.compare",
+  "docketkit.kit.scaffold.work.open",
+  "docketkit.kit.scaffold.work.proposals",
 ]
 
 [tool.setuptools.package-data]
-"lockmaster.kit" = ["*"]
-"lockmaster.kit.claude" = ["*"]
-"lockmaster.kit.claude.hooks" = ["*"]
-"lockmaster.kit.claude.skills" = ["*"]
-"lockmaster.kit.claude.skills.docket" = ["*"]
-"lockmaster.kit.claude.skills.landing" = ["*"]
-"lockmaster.kit.work" = ["*"]
-"lockmaster.kit.scaffold" = ["*"]
-"lockmaster.kit.scaffold._archive" = ["*"]
-"lockmaster.kit.scaffold.docs" = ["*"]
-"lockmaster.kit.scaffold.records" = ["*"]
-"lockmaster.kit.scaffold.scripts" = ["*"]
-"lockmaster.kit.scaffold.work" = ["*"]
-"lockmaster.kit.scaffold.work.compare" = ["*"]
-"lockmaster.kit.scaffold.work.open" = ["*"]
-"lockmaster.kit.scaffold.work.proposals" = ["*"]
+"docketkit.kit" = ["*"]
+"docketkit.kit.claude" = ["*"]
+"docketkit.kit.claude.hooks" = ["*"]
+"docketkit.kit.claude.skills" = ["*"]
+"docketkit.kit.claude.skills.inbox-review" = ["*"]
+"docketkit.kit.claude.skills.landing" = ["*"]
+"docketkit.kit.work" = ["*"]
+"docketkit.kit.scaffold" = ["*"]
+"docketkit.kit.scaffold._archive" = ["*"]
+"docketkit.kit.scaffold.docs" = ["*"]
+"docketkit.kit.scaffold.records" = ["*"]
+"docketkit.kit.scaffold.scripts" = ["*"]
+"docketkit.kit.scaffold.work" = ["*"]
+"docketkit.kit.scaffold.work.compare" = ["*"]
+"docketkit.kit.scaffold.work.open" = ["*"]
+"docketkit.kit.scaffold.work.proposals" = ["*"]
 
 [tool.setuptools.exclude-package-data]
 "*" = [".DS_Store", "*.pyc"]
 
 [tool.setuptools.dynamic]
-version = { attr = "lockmaster.__version__" }
+version = { attr = "docketkit.__version__" }

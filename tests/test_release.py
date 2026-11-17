@@ -30,8 +30,8 @@ class Release(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)
-        (self.root / "src" / "lockmaster").mkdir(parents=True)
-        (self.root / "src/lockmaster/__init__.py").write_text('"""x"""\n\n__version__ = "0.0.1"\n')
+        (self.root / "src" / "docketkit").mkdir(parents=True)
+        (self.root / "src/docketkit/__init__.py").write_text('"""x"""\n\n__version__ = "0.0.1"\n')
         (self.root / "CHANGELOG.md").write_text(LOG)
 
     def tearDown(self):

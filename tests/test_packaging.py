@@ -6,7 +6,7 @@ import unittest
 
 from support import ROOT
 
-from lockmaster import __version__
+from docketkit import __version__
 
 
 class Packaging(unittest.TestCase):
@@ -17,19 +17,19 @@ class Packaging(unittest.TestCase):
         dirs = [ROOT / "kit"] + sorted(d for d in (ROOT / "kit").rglob("*")
                                        if d.is_dir() and d.name != "__pycache__")
         for d in dirs:
-            name = "lockmaster." + ".".join(d.relative_to(ROOT).parts)
+            name = "docketkit." + ".".join(d.relative_to(ROOT).parts)
             with self.subTest(name):
                 self.assertIn('"{}",'.format(name), self.pyproject)
                 self.assertIn('"{}" = ["*"]'.format(name), self.pyproject)
 
     def test_every_listed_kit_package_has_its_directory(self):
         # A kit/ directory removed but still listed breaks the build (setuptools refuses it).
-        for name in re.findall(r'"(lockmaster\.kit[a-z.]*)",', self.pyproject):
+        for name in re.findall(r'"(docketkit\.kit[a-z.]*)",', self.pyproject):
             with self.subTest(name):
                 self.assertTrue((ROOT / "kit").joinpath(*name.split(".")[2:]).is_dir(), name)
 
     def test_the_version_has_one_source(self):
-        self.assertIn('version = { attr = "lockmaster.__version__" }', self.pyproject)
+        self.assertIn('version = { attr = "docketkit.__version__" }', self.pyproject)
         project = self.pyproject.split("[project]", 1)[1].split("\n[", 1)[0]
         self.assertNotRegex(project, r'(?m)^version\s*=')  # no second, static version
         self.assertRegex(__version__, r"^\d+\.\d+\.\d+([ab]\d+|rc\d+)?$")

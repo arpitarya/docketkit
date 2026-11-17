@@ -1,4 +1,4 @@
-"""W-03 DoD 2 and 4 — `lockmaster regen` rebuilds every [generated] path; a
+"""W-03 DoD 2 and 4 — `docketkit regen` rebuilds every [generated] path; a
 failing command fails the run; nothing in the tool forces (SR-ARCHITECTURE
 decision 9, SR-LAW-3)."""
 import re
@@ -16,7 +16,7 @@ class Regen(ScratchCase):
         "src.txt": "one\ntwo\n",
         "COUNT.txt": "stale\n",
         "gen.py": "n = len(open('src.txt').readlines())\nopen('COUNT.txt', 'w').write(str(n) + '\\n')\n",
-        "lockmaster.toml": "[generated]\n\"COUNT.txt\" = '\"{}\" gen.py'\n".format(PY),
+        "docketkit.toml": "[generated]\n\"COUNT.txt\" = '\"{}\" gen.py'\n".format(PY),
     }
 
     def test_rebuilds_each_generated_path(self):
@@ -26,7 +26,7 @@ class Regen(ScratchCase):
         self.assertEqual((self.root / "COUNT.txt").read_text(), "3\n")
 
     def test_a_failing_command_fails_the_run(self):
-        (self.root / "lockmaster.toml").write_text('[generated]\n"COUNT.txt" = "exit 3"\n')
+        (self.root / "docketkit.toml").write_text('[generated]\n"COUNT.txt" = "exit 3"\n')
         code, out, err = self.cli("regen")
         self.assertEqual(code, 2)
         self.assertIn("exited 3", err)

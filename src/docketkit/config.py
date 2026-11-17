@@ -1,7 +1,7 @@
-"""`lockmaster.toml` — SR-ARCHITECTURE decision 13.
+"""`docketkit.toml` — SR-ARCHITECTURE decision 13.
 
     [main]
-    branch = "main"                          # the branch lockmaster lands onto
+    branch = "main"                          # the branch docketkit lands onto
 
     [checks]                                 # name = command; every one must pass
     tests = "python3 -m unittest discover -s tests"
@@ -20,12 +20,21 @@ Read with `tomllib` on Python >= 3.11 and with the subset reader below on
 every Python: four tables of string values and nothing else. Anything outside
 that subset is a loud error, never a guess (W-03 hazard).
 """
+from pathlib import Path
 import re
 
 DRIVERS = ("append-newest-first", "table-rows", "append")
 TABLES = ("main", "checks", "generated", "merge", "land")
 AUTO = ("on", "off")
-FILENAME = "lockmaster.toml"
+FILENAME = "docketkit.toml"
+LEGACY_FILENAME = "lockmaster.toml"   # read until a repo renames it
+
+
+def path(root):
+    """The config file in `root`: docketkit.toml, else the lockmaster.toml it replaced."""
+    root = Path(root)
+    new, old = root / FILENAME, root / LEGACY_FILENAME
+    return old if old.is_file() and not new.is_file() else new
 
 
 class ConfigError(Exception):
@@ -56,7 +65,7 @@ def _string(s, i, where):
     """Parse a basic ("...") or literal ('...') string at s[i]; return (value, next index)."""
     q = s[i]
     if s.startswith(q * 3, i):
-        raise ConfigError(where + ": multi-line strings are outside lockmaster.toml's subset")
+        raise ConfigError(where + ": multi-line strings are outside docketkit.toml's subset")
     i += 1
     buf = []
     while i < len(s):
@@ -90,12 +99,12 @@ def _rest_is_comment(s, i, where):
 
 
 def parse_subset(text):
-    """The subset of TOML lockmaster.toml uses: `[table]` headers and
+    """The subset of TOML docketkit.toml uses: `[table]` headers and
     `key = "string"` pairs, keys bare or quoted, comments. Returns nested dicts
     shaped like tomllib's result."""
     data, table = {}, None
     for n, raw in enumerate(text.splitlines(), 1):
-        where = "lockmaster.toml line {}".format(n)
+        where = "docketkit.toml line {}".format(n)
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
@@ -148,40 +157,40 @@ def parse(text):
         try:
             data = tomllib.loads(text)
         except tomllib.TOMLDecodeError as e:
-            raise ConfigError("lockmaster.toml: " + str(e))
+            raise ConfigError("docketkit.toml: " + str(e))
         # Valid TOML that 3.9 would refuse is refused here too: same file, same result.
         if parse_subset(text) != data:
-            raise ConfigError("lockmaster.toml: uses TOML outside lockmaster's subset")
+            raise ConfigError("docketkit.toml: uses TOML outside docketkit's subset")
     return validate(data)
 
 
 def validate(data):
     for name, table in data.items():
         if name not in TABLES:
-            raise ConfigError("lockmaster.toml: unknown table [" + name + "]; the tables are "
+            raise ConfigError("docketkit.toml: unknown table [" + name + "]; the tables are "
                               + ", ".join("[" + t + "]" for t in TABLES))
         if not isinstance(table, dict):
-            raise ConfigError("lockmaster.toml: `" + name + "` must be a [table]")
+            raise ConfigError("docketkit.toml: `" + name + "` must be a [table]")
         for key, value in table.items():
             if not isinstance(value, str):
-                raise ConfigError("lockmaster.toml: [{}] {} is not a string; only strings are in "
+                raise ConfigError("docketkit.toml: [{}] {} is not a string; only strings are in "
                                   "the subset".format(name, key))
     main = data.get("main", {})
     extra = set(main) - {"branch"}
     if extra:
-        raise ConfigError("lockmaster.toml: [main] knows only `branch` (got " + ", ".join(sorted(extra)) + ")")
+        raise ConfigError("docketkit.toml: [main] knows only `branch` (got " + ", ".join(sorted(extra)) + ")")
     merge = data.get("merge", {})
     for path, driver in merge.items():
         if driver not in DRIVERS:
-            raise ConfigError("lockmaster.toml: [merge] {} = \"{}\" is no driver; the drivers are {}".format(
+            raise ConfigError("docketkit.toml: [merge] {} = \"{}\" is no driver; the drivers are {}".format(
                 path, driver, ", ".join(DRIVERS)))
     land = data.get("land", {})
     extra = set(land) - {"auto"}
     if extra:
-        raise ConfigError("lockmaster.toml: [land] knows only `auto` (got " + ", ".join(sorted(extra)) + ")")
+        raise ConfigError("docketkit.toml: [land] knows only `auto` (got " + ", ".join(sorted(extra)) + ")")
     auto = land.get("auto", "on")
     if auto not in AUTO:
-        raise ConfigError("lockmaster.toml: [land] auto = \"{}\"; it is \"on\" or \"off\"".format(auto))
+        raise ConfigError("docketkit.toml: [land] auto = \"{}\"; it is \"on\" or \"off\"".format(auto))
     return Config(main.get("branch", "main"), data.get("checks"), data.get("generated"), merge, auto)
 
 

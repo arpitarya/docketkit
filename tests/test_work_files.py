@@ -1,5 +1,5 @@
 """W-15 — SR-LAW-10: the six work files are present and kept current in every
-repository lockmaster is installed in: `install` creates a missing one,
+repository docketkit is installed in: `install` creates a missing one,
 `doctor` names a missing or stale one, and the kit's Stop hook tells a session
 that changed files but none of WORKLOG, INTERVIEW or OPEN-WORK, once."""
 import json
@@ -8,7 +8,7 @@ import sys
 
 from support import ScratchCase, git
 
-from lockmaster import doctor, install
+from docketkit import doctor, install
 
 SIX = install.WORK_FILES
 
@@ -26,7 +26,7 @@ class WorkFiles(ScratchCase):
         for name in SIX:
             self.assertTrue((self.root / "work" / name).is_file(), name)
         self.assertIn("work files created", out)
-        lock = json.loads((self.root / ".claude" / "lockmaster.lock").read_text())
+        lock = json.loads((self.root / ".claude" / "docketkit.lock").read_text())
         self.assertFalse(any(rel.startswith("work/") for rel in lock["files"]))  # the project's papers, not kit files
 
     def test_an_existing_work_file_is_never_overwritten(self):
@@ -36,9 +36,9 @@ class WorkFiles(ScratchCase):
         self.install()  # a second install creates nothing and changes nothing
         self.assertEqual((self.root / "work" / "WORKLOG.md").read_text(), "my own log\n")
 
-    def test_the_machine_template_carries_a_budget_lockmaster_reads(self):
+    def test_the_machine_template_carries_a_budget_docketkit_reads(self):
         self.install()
-        from lockmaster import status
+        from docketkit import status
         self.assertEqual(status.budget_gb(self.root), 5.0)
 
     # -------------------------------------------------------- step 2
@@ -116,7 +116,7 @@ class WorkFiles(ScratchCase):
         self.commit("install")
         self.wrote(self.root / "src" / "thing.py")
         self.assertEqual(git(self.root, "status", "--porcelain"), "")
-        self.assertTrue(list((self.root / ".git" / "lockmaster" / "sessions").glob("*.work-files.json")))
+        self.assertTrue(list((self.root / ".git" / "docketkit" / "sessions").glob("*.work-files.json")))
 
     def test_the_hook_is_wired_into_the_kits_settings(self):
         self.install()

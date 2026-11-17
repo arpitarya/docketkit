@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""PreToolUse(Bash) — SR-ARCHITECTURE decision 12: only lockmaster writes to main.
+"""PreToolUse(Bash) — SR-ARCHITECTURE decision 12: only docketkit writes to main.
 
 An agent's `git commit` (or merge, cherry-pick, revert, am, rebase) while
-`main` is checked out is refused, with the way round: `lockmaster start` /
-`lockmaster submit`. lockmaster's own landing runs git from inside
-`lockmaster`, never through the agent's Bash tool, so it is not seen here.
+`main` is checked out is refused, with the way round: `docketkit start` /
+`docketkit submit`. docketkit's own landing runs git from inside
+`docketkit`, never through the agent's Bash tool, so it is not seen here.
 
 A `git push` that updates `main` passes only when it is plain: every option
 is on SAFE_PUSH_OPTIONS and no refspec forces (`+`) or deletes (`:main`), so
-the remote takes it only as a fast-forward of what lockmaster landed
+the remote takes it only as a fast-forward of what docketkit landed
 (ruled by the decider, 2026-10-26). Anything else that would update `main`
 is refused. An allow-list, so an option this hook does not know is refused.
 
@@ -16,8 +16,8 @@ A heredoc's body is text, not commands, and is not judged.
 
 It binds agent sessions only: it is a Claude Code hook, so the decider's own
 terminal is untouched and can still commit to main by hand (W-05 hazard).
-The branch is `lockmaster.toml` `[main] branch`, else `main`.
-Standard library only; it does not need lockmaster installed.
+The branch is `docketkit.toml` `[main] branch`, else `main`.
+Standard library only; it does not need docketkit installed.
 """
 import json
 import os
@@ -51,7 +51,7 @@ def main_branch(cwd):
         root = git(["worktree", "list", "--porcelain"], top)
         first = root.splitlines()[0][len("worktree "):] if root else top
         try:
-            text = open(os.path.join(first, "lockmaster.toml"), encoding="utf-8").read()
+            text = open(os.path.join(first, "docketkit.toml"), encoding="utf-8").read()
         except OSError:
             text = ""
         m = re.search(r"^\[main\][^\[]*?^branch\s*=\s*[\"']([^\"']+)[\"']", text, re.M | re.S)
@@ -163,11 +163,11 @@ def main():
         "hookEventName": "PreToolUse",
         "permissionDecision": "deny",
         "permissionDecisionReason": (
-            "Refused: {}. Only lockmaster writes to main, and only a plain push sends it "
+            "Refused: {}. Only docketkit writes to main, and only a plain push sends it "
             "(SR-ARCHITECTURE decision 12). "
-            "Work on a change instead: `lockmaster start <W-nn> --paths <path>…`, edit in its "
-            "worktree, then `lockmaster submit -m \"…\"` — it lands on main for you. "
-            "Edits already made in main's checkout land with `lockmaster save -m \"…\" <path>…`. "
+            "Work on a change instead: `docketkit start <W-nn> --paths <path>…`, edit in its "
+            "worktree, then `docketkit submit -m \"…\"` — it lands on main for you. "
+            "Edits already made in main's checkout land with `docketkit save -m \"…\" <path>…`. "
             "The decider can still commit to main by hand from a terminal.").format(why)}}))
     return 0
 

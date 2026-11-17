@@ -10,8 +10,8 @@ from pathlib import Path
 
 from support import ScratchCase, git
 
-from lockmaster import land
-from lockmaster.repo import LANDED, LANDING, QUEUED, RED, LandLock
+from docketkit import land
+from docketkit.repo import LANDED, LANDING, QUEUED, RED, LandLock
 
 PY = sys.executable
 
@@ -43,7 +43,7 @@ class Loop(ScratchCase):
         chain = self.first_parents()
         self.assertEqual(chain[2], before)  # two new commits on main, each fast-forwarded onto the last
         for sha, item in zip(chain[:2], ("W-2", "W-1")):
-            self.assertEqual(git(self.root, "log", "-1", "--format=%(trailers:key=Lockmaster-Change,valueonly)", sha),
+            self.assertEqual(git(self.root, "log", "-1", "--format=%(trailers:key=Docketkit-Change,valueonly)", sha),
                              item)
         self.assertEqual((self.root / "a.txt").read_text(), "a\nfrom W-1\n")  # main's checkout moved too
         self.assertEqual((self.root / "b.txt").read_text(), "b\nfrom W-2\n")
@@ -73,7 +73,7 @@ class Loop(ScratchCase):
         self.assertNotIn("stray.txt", git(self.root, "ls-tree", "-r", "--name-only", "main"))
         # Nothing lost: the worktree and branch stay, holding what did not land.
         self.assertTrue((w / "stray.txt").exists())
-        self.assertIn("lm/W-1", git(self.root, "branch", "--list", "lm/W-1"))
+        self.assertIn("dk/W-1", git(self.root, "branch", "--list", "dk/W-1"))
         self.assertTrue(change["cleanup"])
 
     def test_a_directory_claim_covers_what_is_under_it(self):
@@ -105,7 +105,7 @@ class Loop(ScratchCase):
         self.assertIn("conflicts with main in: a.txt", change["reason"])
         self.assertEqual(git(self.root, "rev-parse", "main"), main_before)
         self.assertEqual((w2 / "a.txt").read_text(), "two\n")
-        self.assertEqual(git(self.root, "show", "lm/W-2:a.txt"), "two")
+        self.assertEqual(git(self.root, "show", "dk/W-2:a.txt"), "two")
         self.assertEqual(git(self.root, "worktree", "list", "--porcelain").count("landing"), 0)
 
     def test_a_red_change_is_set_aside_and_the_next_lands(self):
@@ -133,7 +133,7 @@ class Loop(ScratchCase):
         self.assertEqual(git(self.root, "show", "main:a.txt"), "one\ntwo")
 
     def test_a_failed_check_is_red(self):
-        self.write_files(self.root, {"lockmaster.toml": '[checks]\nfails = "exit 7"\n'})
+        self.write_files(self.root, {"docketkit.toml": '[checks]\nfails = "exit 7"\n'})
         self.commit("config")
         w = self.start("W-1", "a.txt")
         (w / "a.txt").write_text("x\n")
@@ -145,7 +145,7 @@ class Loop(ScratchCase):
         self.write_files(self.root, {
             "gen.py": "open('ALL.txt','w').write(open('a.txt').read() + open('b.txt').read())\n",
             "ALL.txt": "a\nb\n",
-            "lockmaster.toml": "[checks]\nok = '\"{0}\" -c \"pass\"'\n"
+            "docketkit.toml": "[checks]\nok = '\"{0}\" -c \"pass\"'\n"
                                "[generated]\n\"ALL.txt\" = '\"{0}\" gen.py'\n".format(PY),
         })
         self.commit("generated")
@@ -159,7 +159,7 @@ class Loop(ScratchCase):
 
     def test_structural_merges_apply_during_a_landing(self):
         self.write_files(self.root, {"work/WORKLOG.md": "# log\n\n---\n\n## old\n",
-                                     "lockmaster.toml": '[merge]\n"work/WORKLOG.md" = "append-newest-first"\n'})
+                                     "docketkit.toml": '[merge]\n"work/WORKLOG.md" = "append-newest-first"\n'})
         self.commit("worklog")
         self.cli("drivers")
         self.commit("attributes")
@@ -188,7 +188,7 @@ class Loop(ScratchCase):
         change = self.submit("W-1")
         self.assertEqual(change["cleanup"], [])
         self.assertFalse(w.exists())
-        self.assertEqual(git(self.root, "branch", "--list", "lm/*"), "")
+        self.assertEqual(git(self.root, "branch", "--list", "dk/*"), "")
         self.assertEqual(len(git(self.root, "worktree", "list").splitlines()), 1)
         code, out, _ = self.cli("doctor")
         self.assertEqual(code, 0, out)
@@ -203,7 +203,7 @@ class Loop(ScratchCase):
         w2 = self.start("W-2", "b.txt")
         self.cli("abandon", "--item", "W-2")
         self.assertFalse(w2.exists())
-        self.assertEqual(git(self.root, "branch", "--list", "lm/W-2"), "")
+        self.assertEqual(git(self.root, "branch", "--list", "dk/W-2"), "")
 
     # -------------------------------------------------------- hazards
 

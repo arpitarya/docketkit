@@ -101,7 +101,7 @@ of it and the decider's call on the other.
    by `session-lock.sh` on every write once past their 900-second TTL, and a
    session's own are released by `release-locks.sh` on `Stop` and `SessionEnd`.
    The same hook also sweeps any write lock past its 900-second TTL, whoever
-   holds it (**lockmaster W-09**): the TTL is the test, not a liveness check.
+   holds it (**docketkit W-09**): the TTL is the test, not a liveness check.
 9. **A git lock file** — `index.lock`, `HEAD.lock`, a ref's or a worktree's
    `.lock` — older than 10 minutes while no git process runs is removed by
    `release-locks.sh`; on a surface that cannot unlink it is renamed into
@@ -126,7 +126,7 @@ of it and the decider's call on the other.
   regenerated. That is deliberate; the list grows only by the decider's ruling.
 - The list also carries the decider's fux and codelaw rulings — `htmlcov`,
   `.eggs`, `runtime`, `.codelaw` — joined in the kit when it was adopted there
-  (**lockmaster W-09**). lockmaster's own landing cleanup keeps the same list, and a test
+  (**docketkit W-09**). docketkit's own landing cleanup keeps the same list, and a test
   fails if the two copies differ.
 - `.claude/hooks/now-ledger.py` ([SR-WORK-NOW](0061_WORK-now.md)) calls this record's
   module at `SessionEnd` and files the items of decisions 3 and 7.

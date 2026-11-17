@@ -19,4 +19,4 @@ built, its trigger is ported into the owning record and the doc moves to
 
 | doc | fork | verdict | reopen-trigger |
 |-----|------|---------|----------------|
-| [`source-control.compare.md`](source-control.compare.md) | keep git, build our own, add a lander, or move to `jj` | git + lockmaster (decided 2026-10-25) | 500 landings a day, a fresh clone past L2, or a 10-minute median queue wait |
+| [`source-control.compare.md`](source-control.compare.md) | keep git, build our own, add a lander, or move to `jj` | git + docketkit (decided 2026-10-25) | 500 landings a day, a fresh clone past L2, or a 10-minute median queue wait |

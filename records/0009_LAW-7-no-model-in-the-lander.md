@@ -3,7 +3,7 @@ type: Standing Record
 kind: law
 name: SR-LAW-7
 title: "SR-LAW-7 (0009) — L7 — no model in the lander"
-description: "no model in the lander — lockmaster never calls an AI model; agents call lockmaster"
+description: "no model in the lander — docketkit never calls an AI model; agents call docketkit"
 status: accepted
 date: 2026-10-25
 feature: "no model in the lander as a law"
@@ -20,7 +20,7 @@ ratifies: "Arpit, 2026-10-25 (Cowork), on W-01: 'All the blockers, I accept what
 
 **The law (L7).**
 
-> **There is no AI model in lockmaster.** The tool never calls a language model or any other model, to land, to merge, to resolve a conflict or to write a message. Agents call lockmaster; lockmaster never calls an agent. A conflict it cannot resolve by its own fixed rules goes red, to the agent and then the decider.
+> **There is no AI model in docketkit.** The tool never calls a language model or any other model, to land, to merge, to resolve a conflict or to write a message. Agents call docketkit; docketkit never calls an agent. A conflict it cannot resolve by its own fixed rules goes red, to the agent and then the decider.
 
 **Ruled by Arpit, 2026-10-25,** on [W-01](../archive/open/W-01-rule-the-laws.md): *"All the blockers, I accept whatever is said over there."*
 
@@ -28,7 +28,7 @@ ratifies: "Arpit, 2026-10-25 (Cowork), on W-01: 'All the blockers, I accept what
 
 ```mermaid
 flowchart LR
-    A["agent (model)"] -->|calls| L["lockmaster (no model)"]
+    A["agent (model)"] -->|calls| L["docketkit (no model)"]
     L -->|red| A
 ```
 
@@ -36,8 +36,8 @@ flowchart LR
 <summary><b>ASCII twin</b></summary>
 
 ```text
-   agent (model) --calls--> lockmaster (no model)
-   lockmaster --red--> agent
+   agent (model) --calls--> docketkit (no model)
+   docketkit --red--> agent
 ```
 
 </details>
@@ -54,7 +54,7 @@ Merging is where a model is most tempting — and where a wrong guess silently s
 
 1. **No model calls** in `src/`: no API client, no network call to a model provider, no subprocess that starts one.
 2. **Fixed rules only:** a structural merge driver either applies its rule or reports a conflict; it never guesses.
-3. **The agent fixes, lockmaster re-checks.** A red change goes back to the agent that made it; when it resubmits, lockmaster runs the same deterministic landing again.
+3. **The agent fixes, docketkit re-checks.** A red change goes back to the agent that made it; when it resubmits, docketkit runs the same deterministic landing again.
 
 ### Consequences
 

@@ -97,7 +97,7 @@ not after.
 - Decision 5 points at [SR-WORK-NOW](0061_WORK-now.md), which owns `.claude/hooks/now-ledger.py`.
 - Decision 5 is nudged by `.claude/hooks/require-progress.sh`: a Stop hook that
   blocks once when the tree changed and `work/NOW.md` did not, then relents;
-  in a repository without `work/NOW.md` it does nothing (**lockmaster W-09**).
+  in a repository without `work/NOW.md` it does nothing (**docketkit W-09**).
 - Every other decision — the worklog entry, INTERVIEW kept current, answer
   length, the two-strikes gate — is judgment.
 - The worklog only grows; decision 14 cuts it at each major release.

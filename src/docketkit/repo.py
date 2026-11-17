@@ -1,6 +1,6 @@
-"""The repository, lockmaster's state and the land lock — SR-ARCHITECTURE decisions 3, 4 and 7.
+"""The repository, docketkit's state and the land lock — SR-ARCHITECTURE decisions 3, 4 and 7.
 
-State lives at `$(git rev-parse --git-common-dir)/lockmaster/`: shared by every
+State lives at `$(git rev-parse --git-common-dir)/docketkit/`: shared by every
 worktree, never committed, gone with the clone. A change is one JSON file in
 `changes/`; the land lock is a `mkdir` mutex holding the lander's pid.
 """
@@ -13,8 +13,8 @@ import stat
 import time
 from pathlib import Path
 
-from lockmaster import config as config_mod
-from lockmaster import git
+from docketkit import config as config_mod
+from docketkit import git
 
 ITEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 WORKTREES_DIR = ".claude/worktrees"
@@ -28,12 +28,12 @@ LIVE = (OPEN, QUEUED, LANDING, WAITING, RED)
 
 # SR-ARCHITECTURE decision 18: the hooks that can refuse a step. A repository's
 # post-* hooks (a re-index, a notification) are side effects of a person's or an
-# agent's own git step; lockmaster's steps leave them out. What a landing must
+# agent's own git step; docketkit's steps leave them out. What a landing must
 # produce, it produces through [generated].
 GATE_HOOKS = ("applypatch-msg", "pre-applypatch", "pre-commit", "pre-merge-commit",
               "prepare-commit-msg", "commit-msg", "pre-rebase", "pre-push")
 FORWARDER = """#!/bin/sh
-# Written by lockmaster (SR-ARCHITECTURE decision 18): while lockmaster runs git,
+# Written by docketkit (SR-ARCHITECTURE decision 18): while docketkit runs git,
 # the repository's gate hooks run and its post-* hooks do not. Rewritten each run.
 hook={}
 [ -x "$hook" ] || exit 0
@@ -41,8 +41,8 @@ exec "$hook" "$@"
 """
 
 
-class LockmasterError(Exception):
-    """A refusal lockmaster explains to the person or agent who asked."""
+class DocketkitError(Exception):
+    """A refusal docketkit explains to the person or agent who asked."""
 
 
 class Repo:
@@ -50,21 +50,27 @@ class Repo:
         cwd = Path(cwd).resolve()
         code, top, _ = git.run(["rev-parse", "--show-toplevel"], cwd, check=False)
         if code != 0:
-            raise LockmasterError("not inside a git repository: " + str(cwd))
+            raise DocketkitError("not inside a git repository: " + str(cwd))
         self.cwd = cwd
         self.toplevel = Path(top.strip())
         common = Path(git.out(["rev-parse", "--git-common-dir"], cwd))
         self.common = (cwd / common).resolve() if not common.is_absolute() else common
         # The primary worktree is the first `git worktree list` entry.
         self.root = Path(git.worktrees(cwd)[0]["path"])
-        self.state = self.common / "lockmaster"
+        self.state = self.common / "docketkit"
+        legacy = self.common / "lockmaster"
+        if legacy.is_dir() and not self.state.exists():
+            try:
+                os.rename(str(legacy), str(self.state))   # the state of the tool's old name
+            except OSError:
+                self.state = legacy
         self.changes_dir = self.state / "changes"
         self._gate_hooks_only()
-        self.config = config_mod.load(self.root / config_mod.FILENAME)
+        self.config = config_mod.load(config_mod.path(self.root))
         self.main = self.config.main
 
     def _gate_hooks_only(self):
-        """Point every git step lockmaster runs at forwarders for the repository's
+        """Point every git step docketkit runs at forwarders for the repository's
         gate hooks only (decision 18)."""
         git.HOOKS = []
         code, val, _ = git.run(["config", "--get", "core.hooksPath"], self.root, check=False)
@@ -120,14 +126,14 @@ class Repo:
         if item:
             change = self.load(item)
             if change is None:
-                raise LockmasterError("no change " + item + " — `lockmaster start " + item + " --paths …` first")
+                raise DocketkitError("no change " + item + " — `docketkit start " + item + " --paths …` first")
             return change
         here = os.path.realpath(str(self.cwd))
         for change in self.changes():
             wt = os.path.realpath(change.get("worktree", ""))
             if change["status"] in LIVE and (here == wt or here.startswith(wt + os.sep)):
                 return change
-        raise LockmasterError("not inside a change's worktree; name the item (--item W-nn)")
+        raise DocketkitError("not inside a change's worktree; name the item (--item W-nn)")
 
     def change_holding(self, path):
         """The live change whose worktree holds `path`, or None."""

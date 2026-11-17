@@ -6,7 +6,7 @@ date: 2026-10-25
 
 # Source control for many agents on one machine
 
-> **Verdict:** decided · **git, with lockmaster landing changes onto `main` one at a time** · confidence: high for today's scale · reopen-trigger below.
+> **Verdict:** decided · **git, with docketkit landing changes onto `main` one at a time** · confidence: high for today's scale · reopen-trigger below.
 
 ## Context
 
@@ -24,7 +24,7 @@ worktrees filling the disk, work stranded on branches.
 |---|---|---|
 | A | git as it is, plus rules in the records | nothing mechanical; the collisions recur |
 | B | a new system in Scion's mould | everything — server, client, review, CI |
-| C | **git + lockmaster** | one lander; claims; generated files rebuilt; worktrees removed |
+| C | **git + docketkit** | one lander; claims; generated files rebuilt; worktrees removed |
 | D | Jujutsu (`jj`) over git | conflicts stored rather than blocking; an operation log |
 
 ## Matrix
@@ -39,7 +39,7 @@ worktrees filling the disk, work stranded on branches.
 ## Consequences
 
 C is SR-ARCHITECTURE. D stays open as backlog row B-003: it composes with C
-(lockmaster could drive `jj`) if git's conflict handling becomes the limit.
+(docketkit could drive `jj`) if git's conflict handling becomes the limit.
 
 ## References
 
@@ -48,5 +48,5 @@ C is SR-ARCHITECTURE. D stays open as backlog row B-003: it composes with C
 ## Reopen-trigger
 
 A repository here passes **500 landings a day**, or its working tree passes
-**the L2 budget on a fresh clone**, or the median wait in `lockmaster queue`
+**the L2 budget on a fresh clone**, or the median wait in `docketkit queue`
 passes **10 minutes**.

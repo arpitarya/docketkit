@@ -1,5 +1,5 @@
-"""`lockmaster status` — SR-ARCHITECTURE decision 14: what is live, from git
-and lockmaster's state, never from a hand-edited file.
+"""`docketkit status` — SR-ARCHITECTURE decision 14: what is live, from git
+and docketkit's state, never from a hand-edited file.
 
     sessions   work/NOW.md's In flight rows, with each one's last heartbeat
     changes    every live change: status, branch, worktree, claim
@@ -12,9 +12,9 @@ import re
 import time
 from pathlib import Path
 
-from lockmaster import git
-from lockmaster import now as now_mod
-from lockmaster.repo import LIVE
+from docketkit import git
+from docketkit import now as now_mod
+from docketkit.repo import LIVE
 
 BUDGET_RE = re.compile(r"^\|\s*budget\s*\|\s*([0-9.]+)\s*GB", re.M)
 
@@ -89,7 +89,7 @@ def report(repo):
     if not live:
         lines.append("  none")
 
-    from lockmaster import land
+    from docketkit import land
     overlaps = land.checkout_overlaps(repo)
     if overlaps:  # W-10: the clash, before the landing
         lines.append("main's checkout")

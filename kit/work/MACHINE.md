@@ -5,7 +5,7 @@ description: "Why a command fails on this machine, and the disk budget every age
 
 # MACHINE — this machine's quirks and budget
 
-Written by `lockmaster install` (lockmaster's law L10). One row per quirk that
+Written by `docketkit install` (docketkit's law L10). One row per quirk that
 made a command fail here, with what works instead.
 
 ## Disk budget

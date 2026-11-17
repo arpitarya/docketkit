@@ -243,7 +243,7 @@ class ReleaseLocks(Installed):
 
 
 class KitNamesNoRepositoryRule(unittest.TestCase):
-    """Two strikes, a gate (SR-WORK-SESSION decision 13): the kit's docket skill
+    """Two strikes, a gate (SR-WORK-SESSION decision 13): the kit's inbox-review skill
     restated fux's rule 41 (W-09) and then a fixed list of queue groups, which
     codelaw had to hand-edit (W-15). A kit skill lists no queue groups: each
     repository's queue names its own (a shared rule may still name one)."""
@@ -265,8 +265,8 @@ if __name__ == "__main__":
 
 
 class HooksFindThePublishedPackage(Installed):
-    """W-16: a repository runs the published package. The hooks find lockmaster in
-    the `lockmaster` command's own environment (`uv tool`, pipx) and never in a
+    """W-16: a repository runs the published package. The hooks find docketkit in
+    the `docketkit` command's own environment (`uv tool`, pipx) and never in a
     checkout beside the repository."""
 
     PROBE = ("import importlib.util, sys\n"
@@ -275,7 +275,7 @@ class HooksFindThePublishedPackage(Installed):
              "print(getattr(m, sys.argv[2])())\n")
 
     def probe(self, hook, fn, path):
-        env = {k: v for k, v in os.environ.items() if k not in ("LOCKMASTER_SRC", "PYTHONPATH")}
+        env = {k: v for k, v in os.environ.items() if k not in ("DOCKETKIT_SRC", "PYTHONPATH")}
         env["PATH"] = path
         r = subprocess.run([sys.executable, "-I", "-c", self.PROBE, str(self.root / ".claude" / "hooks" / hook), fn],
                            capture_output=True, text=True, env=env, cwd=str(self.root))
@@ -283,12 +283,12 @@ class HooksFindThePublishedPackage(Installed):
         return r.stdout.strip()
 
     def tool_env(self):
-        env = self.root.parent / "tools" / "lockmaster"
-        if sys.platform == "win32":  # a Windows venv: Scripts\lockmaster.exe, Lib\site-packages
-            bindir, site, exe = env / "Scripts", env / "Lib" / "site-packages", "lockmaster.exe"
+        env = self.root.parent / "tools" / "docketkit"
+        if sys.platform == "win32":  # a Windows venv: Scripts\docketkit.exe, Lib\site-packages
+            bindir, site, exe = env / "Scripts", env / "Lib" / "site-packages", "docketkit.exe"
         else:
-            bindir, site, exe = env / "bin", env / "lib" / "python3.13" / "site-packages", "lockmaster"
-        shutil.copytree(str(ROOT_SRC / "lockmaster"), str(site / "lockmaster"))
+            bindir, site, exe = env / "bin", env / "lib" / "python3.13" / "site-packages", "docketkit"
+        shutil.copytree(str(ROOT_SRC / "docketkit"), str(site / "docketkit"))
         bindir.mkdir(parents=True)
         (bindir / exe).write_text("#!/bin/sh\n")
         (bindir / exe).chmod(0o755)
@@ -305,8 +305,8 @@ class HooksFindThePublishedPackage(Installed):
         self.assertNotEqual(self.probe("now-ledger.py", "renderer", path), "None")
 
     def test_a_checkout_beside_the_repository_is_never_used(self):
-        beside = self.root.parent / "lockmaster" / "src"
-        shutil.copytree(str(ROOT_SRC / "lockmaster"), str(beside / "lockmaster"))
+        beside = self.root.parent / "docketkit" / "src"
+        shutil.copytree(str(ROOT_SRC / "docketkit"), str(beside / "docketkit"))
         path = os.path.dirname(shutil.which("git"))
         self.assertEqual(self.probe("auto-land.py", "find_src", path), "None")
 

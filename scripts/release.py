@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Cut and verify a lockmaster release — SR-ARCHITECTURE decision 17.
+"""Cut and verify a docketkit release — SR-ARCHITECTURE decision 17.
 
     python3 scripts/release.py prepare 0.1.0   # bump __version__, cut CHANGELOG's [Unreleased] into [0.1.0]
     python3 scripts/release.py check v0.1.0    # CI: the tag, __version__ and a CHANGELOG section agree
     python3 scripts/release.py notes v0.1.0    # CI: that version's CHANGELOG section, for the GitHub release
 
-The version has one source, `src/lockmaster/__init__.py`; pyproject.toml reads
+The version has one source, `src/docketkit/__init__.py`; pyproject.toml reads
 it. A release is the tag `v<version>` pushed to GitHub: `.github/workflows/
 release.yml` tests, builds, verifies and publishes it (TestPyPI, then PyPI).
 Python >= 3.9, standard library only.
@@ -25,9 +25,9 @@ class ReleaseError(Exception):
 
 
 def current(root=ROOT):
-    m = INIT_RE.search((root / "src" / "lockmaster" / "__init__.py").read_text(encoding="utf-8"))
+    m = INIT_RE.search((root / "src" / "docketkit" / "__init__.py").read_text(encoding="utf-8"))
     if not m:
-        raise ReleaseError("no `__version__ = \"…\"` line in src/lockmaster/__init__.py")
+        raise ReleaseError("no `__version__ = \"…\"` line in src/docketkit/__init__.py")
     return m.group(1)
 
 
@@ -62,7 +62,7 @@ def prepare(version, root=ROOT, today=None):
                  "## [Unreleased]\n\n## [{}] - {}\n\n{}\n\n".format(version, stamp, unreleased),
                  log, count=1, flags=re.M | re.S)
     log_path.write_text(log.rstrip("\n") + "\n", encoding="utf-8")
-    init = root / "src" / "lockmaster" / "__init__.py"
+    init = root / "src" / "docketkit" / "__init__.py"
     init.write_text(INIT_RE.sub('__version__ = "{}"'.format(version), init.read_text(encoding="utf-8")),
                     encoding="utf-8")
     return old
@@ -75,7 +75,7 @@ def check(tag, root=ROOT):
     key(version)
     have = current(root)
     if have != version:
-        raise ReleaseError("tag {} but src/lockmaster/__init__.py says {}".format(tag, have))
+        raise ReleaseError("tag {} but src/docketkit/__init__.py says {}".format(tag, have))
     if not section((root / "CHANGELOG.md").read_text(encoding="utf-8"), version):
         raise ReleaseError("CHANGELOG.md has no non-empty [{}] section".format(version))
     return version
@@ -89,9 +89,9 @@ def main(argv):
     try:
         if mode == "prepare":
             old = prepare(arg)
-            print("{} -> {}: src/lockmaster/__init__.py and CHANGELOG.md updated.".format(old, arg))
-            print("Next: commit both (the decider, or through `lockmaster submit`), then\n"
-                  "  git tag -a v{0} -m \"lockmaster {0}\" && git push origin main v{0}".format(arg))
+            print("{} -> {}: src/docketkit/__init__.py and CHANGELOG.md updated.".format(old, arg))
+            print("Next: commit both (the decider, or through `docketkit submit`), then\n"
+                  "  git tag -a v{0} -m \"docketkit {0}\" && git push origin main v{0}".format(arg))
         elif mode == "check":
             print("release {} checks out".format(check(arg)))
         else:

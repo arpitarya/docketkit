@@ -80,7 +80,7 @@ check that slips on the first busy day.
    (`git rev-list --first-parent`; `.github/workflows/ci.yml`, job `lint`),
    each judged by what it brought to its first parent, against the register
    and message as they stood in that commit (`SR_GUARD_COMMIT=<sha>
-   scripts/sr-guard.sh`). A lockmaster landing is a merge carrying the message
+   scripts/sr-guard.sh`). A docketkit landing is a merge carrying the message
    `main` received; its branch's own commits are not replayed — a resubmit
    after a refusal leaves the refused first attempt on the branch (2026-11-09,
    W-19: three such commits had failed every CI run since 2026-10-26).

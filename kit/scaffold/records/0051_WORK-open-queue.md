@@ -187,7 +187,7 @@ the top.
     and each inbox row its `filed` column.
 40. `age` is arithmetic — today minus `filed`, recomputed on every read, never
     copied. **The inbox table stores no `age` column**; whoever shows the inbox
-    computes it (`.claude/hooks/inject-inbox.sh`, `/docket`).
+    computes it (`.claude/hooks/inject-inbox.sh`, `/inbox-review`).
 41. Any inbox row older than 5 days is named, with its age, in the session's
     first output.
 42. Every inbox row is followed by a `↳ **blocks:**` sub-row naming every item
@@ -270,7 +270,7 @@ under its header:
 ### Consequences
 
 - **Enforced today:** rules 45a and 23b, by `.claude/hooks/guard-open-work-inbox.sh`, which matches any
-  `## Blocked on …` heading (**lockmaster W-09**)
+  `## Blocked on …` heading (**docketkit W-09**)
   (PostToolUse), which runs `scripts/check-open-work-inbox.py`. Rules 33 and 41
   are supported by `.claude/hooks/inject-inbox.sh`, which puts the inbox in
   front of every prompt with each row's age computed (rule 40).

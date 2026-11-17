@@ -119,7 +119,7 @@ Start from `TEMPLATE.md`.
 | [0060](0060_WORK-registry.md) | **SR-WORK-REGISTRY** | The doc registry — rules in §2, the table in §3 | accepted | yes |
 | [0061](0061_WORK-now.md) | **SR-WORK-NOW** | `work/NOW.md` holds only what is live — a row per session; what a session leaves becomes a work item | accepted | yes |
 | [0062](0062_WORK-cleanup.md) | **SR-WORK-CLEANUP** | Worktrees, lock files and session leftovers — cleaned automatically when nothing is lost; red, blocked on the decider, when something would be | accepted | yes |
-| [0063](0063_WORK-landing.md) | **SR-WORK-LANDING** | A change reaches `main` only through lockmaster; the four landing hooks are lockmaster's kit | accepted | yes |
+| [0063](0063_WORK-landing.md) | **SR-WORK-LANDING** | A change reaches `main` only through docketkit; the four landing hooks are docketkit's kit | accepted | yes |
 
 ---
 

@@ -1,6 +1,6 @@
 """The core loop — SR-ARCHITECTURE decisions 4-8 and 11.
 
-    start    branch lm/<item> + a worktree under .claude/worktrees/ + the claim
+    start    branch dk/<item> + a worktree under .claude/worktrees/ + the claim
     claim    widen the claim
     submit   commit the claimed paths in the worktree, join the queue, start `run`
     run      take the land lock; land queued changes oldest first
@@ -9,7 +9,7 @@
 A landing (decision 8): the claimed paths' diff against the merge base becomes
 one commit; it is cherry-picked onto the latest `main` in a fresh worktree;
 generated files are rebuilt; the checks run; the result is committed with a
-`Lockmaster-Change:` trailer and `main` is fast-forwarded to it. When the whole
+`Docketkit-Change:` trailer and `main` is fast-forwarded to it. When the whole
 branch landed, the landing commit also records the branch tip as a parent, so
 git itself can prove the branch merged and `git branch -d` removes it
 (SR-LAW-3 decision 2). Anything outside the claim is left behind and reported.
@@ -29,36 +29,36 @@ import time
 from datetime import date
 from pathlib import Path
 
-from lockmaster import git
-from lockmaster import generated
-from lockmaster import now as now_mod
-from lockmaster.repo import (ABANDONED, ITEM_RE, LANDED, LANDING, LIVE, OPEN, QUEUED, RED, WAITING,
-                             LandLock, LockmasterError, claimed, matches, norm)
+from docketkit import git
+from docketkit import generated
+from docketkit import now as now_mod
+from docketkit.repo import (ABANDONED, ITEM_RE, LANDED, LANDING, LIVE, OPEN, QUEUED, RED, WAITING,
+                             LandLock, DocketkitError, claimed, matches, norm)
 
-TRAILER = "Lockmaster-Change"
+TRAILER = "Docketkit-Change"
 MAIN_TRIES = 3
 # SR-WORK-NOW: the live ledger, rewritten by hooks and by every landing, so it is
 # nearly always uncommitted in main's checkout. A landing that changes it carries
 # the checkout's copy (decision 8a) instead of waiting on it.
 LEDGER = "work/NOW.md"
-WAITING_REF = "refs/lockmaster/waiting/"
+WAITING_REF = "refs/docketkit/waiting/"
 
 # SR-WORK-CLEANUP decision 1(c): the only ignored files a worktree removal may
 # take with it. The same list as the kit's worktree-cleanup.py.
 BUILD_OUTPUT = {
     "target", "node_modules", "dist", "build", ".venv", "venv", "__pycache__",
     ".pytest_cache", ".mypy_cache", ".ruff_cache", ".tox", ".nox", ".cache",
-    ".turbo", ".next", ".parcel-cache", "coverage", ".coverage", ".lockmaster",
+    ".turbo", ".next", ".parcel-cache", "coverage", ".coverage", ".docketkit", ".lockmaster",
     "htmlcov", ".eggs", "runtime", ".codelaw",  # fux's and codelaw's rulings, joined in the kit (W-09)
     ".DS_Store",
 }
 
 
-class Red(LockmasterError):
+class Red(DocketkitError):
     """This change cannot land as it is; nothing was changed."""
 
 
-class Waiting(LockmasterError):
+class Waiting(DocketkitError):
     """W-10: the landing commit is made and checked, and only uncommitted edits
     in main's checkout to `paths` refused the fast-forward. Nothing was changed."""
 
@@ -71,7 +71,7 @@ class Waiting(LockmasterError):
 
 def waiting_reason(checkout, paths):
     return ("main's checkout at {} has uncommitted edits to {} that this landing would overwrite; "
-            "it lands by itself once they are committed, handed off (`lockmaster save`) or undone").format(
+            "it lands by itself once they are committed, handed off (`docketkit save`) or undone").format(
                 checkout, ", ".join(paths))
 
 
@@ -84,26 +84,26 @@ def _say(out, text):
 
 def start(repo, item, paths, session=""):
     if not ITEM_RE.match(item or ""):
-        raise LockmasterError("an item id is letters, digits, `.`, `_` or `-` (got `{}`)".format(item))
+        raise DocketkitError("an item id is letters, digits, `.`, `_` or `-` (got `{}`)".format(item))
     if not paths:
-        raise LockmasterError("name the paths this change may touch: --paths <path>…")
+        raise DocketkitError("name the paths this change may touch: --paths <path>…")
     old = repo.load(item)
     if old and old["status"] in LIVE:
-        raise LockmasterError("{} already has a {} change at {}".format(item, old["status"], old["worktree"]))
-    branch = "lm/" + item
+        raise DocketkitError("{} already has a {} change at {}".format(item, old["status"], old["worktree"]))
+    branch = "dk/" + item
     if git.ok(["rev-parse", "--verify", "--quiet", "refs/heads/" + branch], repo.root):
-        raise LockmasterError("branch {} already exists; land, abandon or rename it first".format(branch))
+        raise DocketkitError("branch {} already exists; land, abandon or rename it first".format(branch))
     main_sha = git.out(["rev-parse", "--verify", repo.main + "^{commit}"], repo.root)
     wt = repo.worktree_for(item)
     if wt.exists():
-        raise LockmasterError("{} already exists; it is not lockmaster's to reuse".format(wt))
+        raise DocketkitError("{} already exists; it is not docketkit's to reuse".format(wt))
     repo.exclude_worktrees()
     try:
         git.worktree_add(["-b", branch, str(wt), main_sha], repo.root)
     except git.GitError:
         # SR-LAW-8: two starts of one item at once — git's ref lock let one win.
         if git.ok(["rev-parse", "--verify", "--quiet", "refs/heads/" + branch], repo.root) or wt.exists():
-            raise LockmasterError("{} was started by another session at the same moment".format(item))
+            raise DocketkitError("{} was started by another session at the same moment".format(item))
         raise
     claims = sorted({norm(p) for p in paths})
     overlaps = []
@@ -122,7 +122,7 @@ def start(repo, item, paths, session=""):
 
 def claim_add(repo, change, paths):
     if change["status"] not in LIVE:
-        raise LockmasterError("{} is {}; its claim is closed".format(change["item"], change["status"]))
+        raise DocketkitError("{} is {}; its claim is closed".format(change["item"], change["status"]))
     change["paths"] = sorted(set(change["paths"]) | {norm(p) for p in paths})
     repo.save(change)
     return change
@@ -150,12 +150,12 @@ def submit(repo, change, message="", out=None, keep=False):
     """Commit the claimed paths in the worktree and queue the change. With
     `keep` (an auto-landing, decision 20) the change stays open after it lands."""
     if change["status"] in (LANDED, ABANDONED):
-        raise LockmasterError("{} is already {}".format(change["item"], change["status"]))
+        raise DocketkitError("{} is already {}".format(change["item"], change["status"]))
     if change["status"] == LANDING:
-        raise LockmasterError("{} is landing right now".format(change["item"]))
+        raise DocketkitError("{} is landing right now".format(change["item"]))
     wt = Path(change["worktree"])
     if not wt.is_dir():
-        raise LockmasterError("{}'s worktree {} is gone".format(change["item"], wt))
+        raise DocketkitError("{}'s worktree {} is gone".format(change["item"], wt))
     dirty = status_paths(wt)
     mine = [p for p in dirty if claimed(p, change["paths"])]
     others = sorted(set(dirty) - set(mine))
@@ -188,7 +188,7 @@ def run(repo, out=None):
     number landed, or None when another lander holds the lock."""
     landed = 0
     try:
-        from lockmaster import drivers
+        from docketkit import drivers
         healed = drivers.heal(repo)  # decision 10: a driver registered on another surface is re-pointed here
         if healed:
             _say(out, "merge drivers re-pointed at this machine: " + ", ".join(healed))
@@ -239,8 +239,8 @@ def land_one(repo, change, out=None):
         return _red(repo, change, str(e), out)
     except Exception as e:  # noqa: BLE001 — a bug is red, never a half-landing
         if keep:
-            return _held(repo, change, "lockmaster failed while landing: {}".format(e), out)
-        return _red(repo, change, "lockmaster failed while landing: {}".format(e), out)
+            return _held(repo, change, "docketkit failed while landing: {}".format(e), out)
+        return _red(repo, change, "docketkit failed while landing: {}".format(e), out)
     return _done(repo, change, sha, left, unclaimed, out)
 
 
@@ -348,7 +348,7 @@ def retry_waiting(repo, change, out=None):
     except Waiting as again:
         return _waiting(repo, change, _waiting_again(again.checkout, again.paths, w), out)
     except Exception as e:  # noqa: BLE001 — a bug is red (or held), never a half-landing
-        moved = "lockmaster failed while landing: {}".format(e)
+        moved = "docketkit failed while landing: {}".format(e)
     if moved == "moved":
         _requeue(repo, change)
         return False
@@ -378,7 +378,7 @@ def _follow(repo, change, sha):
         args = ["merge", "-q", "--ff-only", sha]
     else:  # committed paths outside the claim stayed on the branch: merge main in
         args = ["merge", "-q", "--no-edit", "--no-verify", "-m",
-                "lockmaster: {} follows {} after a landing".format(change["item"], repo.main), sha]
+                "docketkit: {} follows {} after a landing".format(change["item"], repo.main), sha]
     code, o, e = git.run(args, wt, check=False)
     if code == 0:
         return ""
@@ -395,9 +395,9 @@ def _red(repo, change, reason, out):
     _say(out, "\n".join([
         "red: {} — {}".format(item, reason),
         "  Nothing on {} or in {} was changed.".format(repo.main, change["worktree"]),
-        "  Fix it there and run `lockmaster submit` again; queued changes behind it still land.",
+        "  Fix it there and run `docketkit submit` again; queued changes behind it still land.",
         "  If you cannot fix it, put this row in the decider's inbox (SR-WORK-OPEN-QUEUE rule 42):",
-        "  | 🔴 Land or drop lockmaster change {}: {} | {} |".format(item, short, date.today().isoformat()),
+        "  | 🔴 Land or drop docketkit change {}: {} | {} |".format(item, short, date.today().isoformat()),
         "  | ↳ **blocks:** {} | |".format(item),
     ]))
     return False
@@ -433,7 +433,7 @@ def _claimed_commit(repo, base, tip, files, item):
             index.unlink()
         except OSError:
             pass
-    return git.out(["commit-tree", tree, "-p", base, "-m", "lockmaster: the claimed paths of " + item], repo.root)
+    return git.out(["commit-tree", tree, "-p", base, "-m", "docketkit: the claimed paths of " + item], repo.root)
 
 
 def _message(repo, change, base, tip):
@@ -486,7 +486,8 @@ def land(repo, change):
             if git.ok(["diff", "--cached", "--quiet"], landing):
                 raise Red("every claimed change is already on {}; abandon the change".format(repo.main))
             for name, command in cfg.checks.items():
-                env = dict(os.environ, LOCKMASTER_LANDING="1", LOCKMASTER_CHANGE=change["item"])
+                env = dict(os.environ, DOCKETKIT_LANDING="1", DOCKETKIT_CHANGE=change["item"],
+                           LOCKMASTER_LANDING="1", LOCKMASTER_CHANGE=change["item"])   # the old names, for hooks not yet renamed
                 r = subprocess.run(command, shell=True, cwd=str(landing), capture_output=True, text=True, env=env)
                 if r.returncode != 0:
                     tail = (r.stdout + r.stderr).strip().splitlines()[-15:]
@@ -626,13 +627,13 @@ def _changed_in(cwd, a, b):
 
 
 def _remove_landing(repo, landing):
-    """The landing worktree is lockmaster's own. Whatever is in it is
+    """The landing worktree is docketkit's own. Whatever is in it is
     committed to its detached HEAD first, so even a failed attempt loses
     nothing, then the worktree is removed the safe way."""
     if landing.is_dir():
         if git.dirty(landing):
             git.run(["add", "-A"], landing, check=False)
-            git.run(["commit", "-q", "--no-verify", "-m", "lockmaster: what a red landing attempt held"],
+            git.run(["commit", "-q", "--no-verify", "-m", "docketkit: what a red landing attempt held"],
                     landing, check=False)
         git.run(["worktree", "remove", str(landing)], repo.root, check=False)
     git.run(["worktree", "prune"], repo.root, check=False)
@@ -675,9 +676,9 @@ def cleanup(repo, change):
 
 def abandon(repo, change, out=None):
     if change["status"] == LANDING:
-        raise LockmasterError("{} is landing right now".format(change["item"]))
+        raise DocketkitError("{} is landing right now".format(change["item"]))
     if change["status"] in (LANDED, ABANDONED):
-        raise LockmasterError("{} is already {}".format(change["item"], change["status"]))
+        raise DocketkitError("{} is already {}".format(change["item"], change["status"]))
     change["status"] = ABANDONED
     change["abandoned_at"] = time.time()
     _drop_waiting(repo, change)
@@ -809,15 +810,15 @@ def _mine(change, session, cwd):
 
 
 def adopt(repo, worktree, session=""):
-    """Make a worktree lockmaster did not create — `claude --worktree`, an
+    """Make a worktree docketkit did not create — `claude --worktree`, an
     agent's isolated worktree — a change of its own, so it lands like one. Its
     claim is everything it changed; it is widened on every landing, because
-    the worktree is that session's alone. lockmaster never removes it. Returns
-    None for the primary checkout, a lockmaster worktree, one a live change
+    the worktree is that session's alone. docketkit never removes it. Returns
+    None for the primary checkout, a docketkit worktree, one a live change
     already holds, or a branch with no history in common with main."""
     t = next((t for t in git.worktrees(repo.root) if _inside(worktree, t["path"])
               and os.path.realpath(t["path"]) != os.path.realpath(str(repo.root))), None)
-    if t is None or not t["branch"] or t["branch"] == repo.main or t["branch"].startswith("lm/"):
+    if t is None or not t["branch"] or t["branch"] == repo.main or t["branch"].startswith(("dk/", "lm/")):
         return None
     if repo.change_holding(t["path"]) is not None:
         return None
@@ -870,7 +871,7 @@ def sync(repo, session="", cwd=None, final=False, adopt_cwd=True, out=None):
     follows main) or at the end of the session (`final`: an ordinary submit,
     then cleanup; a change with nothing new is finished). Returns the changes
     it queued. Lands nothing on a surface that cannot commit."""
-    from lockmaster import surface
+    from docketkit import surface
     if not repo.config.auto_land:
         return []
     ok_, why = surface.can_commit(repo)
@@ -1015,13 +1016,13 @@ def _relative(repo, paths, cwd=None):
 def _require_main_checkout(repo):
     holder = next((t for t in git.worktrees(repo.root) if t["branch"] == repo.main), None)
     if holder is None or os.path.realpath(holder["path"]) != os.path.realpath(str(repo.root)):
-        raise LockmasterError("main's checkout is not the primary checkout; save needs {} checked out at {}".format(
+        raise DocketkitError("main's checkout is not the primary checkout; save needs {} checked out at {}".format(
             repo.main, repo.root))
 
 
 def _copy_in(repo, wt, dirty):
     """Copy the checkout's versions of `dirty` into the worktree `wt` (a
-    deletion deletes). The worktree is lockmaster's own copy; the checkout is
+    deletion deletes). The worktree is docketkit's own copy; the checkout is
     only read."""
     import shutil
     for p in dirty:
@@ -1046,7 +1047,7 @@ def save(repo, paths, message, item=None, out=None, change=None):
     Returns the change, or None when nothing under `paths` is uncommitted."""
     _require_main_checkout(repo)
     if not paths:
-        raise LockmasterError("name the paths to save: lockmaster save -m \"…\" <path>…")
+        raise DocketkitError("name the paths to save: docketkit save -m \"…\" <path>…")
     dirty = _checkout_dirty(repo, paths)
     if not dirty:
         return None
@@ -1061,7 +1062,7 @@ def save(repo, paths, message, item=None, out=None, change=None):
 
 
 def _start_unique(repo, item, paths):
-    """Start a change for `save`. A name lockmaster chose is made unique when
+    """Start a change for `save`. A name docketkit chose is made unique when
     another save took it in the same second (SR-LAW-8 decision 3)."""
     session = os.environ.get("CLAUDE_SESSION_ID", "")
     if item:
@@ -1073,9 +1074,9 @@ def _start_unique(repo, item, paths):
             continue
         try:
             return start(repo, name, paths, session)[0]
-        except LockmasterError:
+        except DocketkitError:
             continue  # taken by a save running at the same moment
-    raise LockmasterError("could not find a free name for this save after {}".format(base))
+    raise DocketkitError("could not find a free name for this save after {}".format(base))
 
 
 def handoffs_dir(repo):
@@ -1151,8 +1152,8 @@ def pickup(repo, out=None):
     is retried with the checkout's edits once they change — the note is the
     reason, given once); `waiting` (queued behind another lander); `skipped`
     (unchanged since it went red or was held, or this surface cannot commit);
-    `failed` (lockmaster itself failed on it; the handoff is kept)."""
-    from lockmaster import surface
+    `failed` (docketkit itself failed on it; the handoff is kept)."""
+    from docketkit import surface
     pending_ = handoffs(repo)
     if not pending_:
         return []
@@ -1175,7 +1176,7 @@ def pickup(repo, out=None):
                 try:
                     results.extend(_pickup_group(repo, group, out))
                 except Exception as e:  # noqa: BLE001 — one bad handoff never stops the rest
-                    _say(out, "handoff {}: lockmaster failed on it: {}".format(group[-1]["item"], e))
+                    _say(out, "handoff {}: docketkit failed on it: {}".format(group[-1]["item"], e))
                     results.extend((h["item"], "failed", str(e)) for h in group)
         _write_stamp(repo)
     finally:
@@ -1306,7 +1307,7 @@ def _pickup_group(repo, group, out):
             if lead.get("held_digest") == digest:
                 return each("skipped")
             reason = ("edited in main's checkout after it was handed off, and not handed off again: {}. "
-                      "It lands once that edit is handed off too (`lockmaster save`) or undone.").format(
+                      "It lands once that edit is handed off too (`docketkit save`) or undone.").format(
                           ", ".join(drifted))
             keep(held_digest=digest, reason=reason)
             _say(out, "handoff {}: held — {}".format(lead["item"], reason))

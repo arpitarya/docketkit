@@ -92,23 +92,23 @@ into a scan anyone can do at task end.
 
 | Document | Update trigger | Last verified | Notes |
 |---|---|---|---|
-| `CLAUDE.md` | any rule or pointer changes | — | created by `lockmaster install` |
-| `AGENTS.md` | CLAUDE.md is renamed or the agents it points at change | — | created by `lockmaster install` |
-| `work/README.md` | a file is added to or removed from `work/` | — | created by `lockmaster install` |
-| `work/OPEN-WORK.md` | the same change as the work it tracks | — | created by `lockmaster install` |
-| `work/BACKLOG.md` | a record names something nobody is doing | — | created by `lockmaster install` |
-| `work/open/README.md` | the item-file contract changes | — | created by `lockmaster install` |
-| `work/INTERVIEW.md` | direction, a decision or the live state changes — during the session | — | created by `lockmaster install` |
-| `work/IMPLEMENTATION.md` | something lands | — | created by `lockmaster install` |
-| `work/WORKLOG.md` | every session, before it ends — chat-only ones too | — | created by `lockmaster install` |
-| `work/NOW.md` | kept by hooks and every landing: a row per live session; empty when nothing runs | — | created by `lockmaster install` |
-| `work/LESSONS.md` | a failure teaches something durable | — | created by `lockmaster install` |
-| `work/MACHINE.md` | a surface breaks in a way the code did not cause; the budget is ruled (L2) | — | created by `lockmaster install` |
-| `work/compare/README.md` | a fork opens, closes, or its trigger fires | — | created by `lockmaster install` |
-| `work/proposals/README.md` | an idea is filed, graduates, or is rejected | — | created by `lockmaster install` |
-| `docs/GLOSSARY.md` | a term is coined or redefined | — | created by `lockmaster install` |
-| `records/README.md` | a record's state, ownership or number changes | — | created by `lockmaster install` |
-| `records/TEMPLATE.md` | the convention changes | — | created by `lockmaster install` |
+| `CLAUDE.md` | any rule or pointer changes | — | created by `docketkit install` |
+| `AGENTS.md` | CLAUDE.md is renamed or the agents it points at change | — | created by `docketkit install` |
+| `work/README.md` | a file is added to or removed from `work/` | — | created by `docketkit install` |
+| `work/OPEN-WORK.md` | the same change as the work it tracks | — | created by `docketkit install` |
+| `work/BACKLOG.md` | a record names something nobody is doing | — | created by `docketkit install` |
+| `work/open/README.md` | the item-file contract changes | — | created by `docketkit install` |
+| `work/INTERVIEW.md` | direction, a decision or the live state changes — during the session | — | created by `docketkit install` |
+| `work/IMPLEMENTATION.md` | something lands | — | created by `docketkit install` |
+| `work/WORKLOG.md` | every session, before it ends — chat-only ones too | — | created by `docketkit install` |
+| `work/NOW.md` | kept by hooks and every landing: a row per live session; empty when nothing runs | — | created by `docketkit install` |
+| `work/LESSONS.md` | a failure teaches something durable | — | created by `docketkit install` |
+| `work/MACHINE.md` | a surface breaks in a way the code did not cause; the budget is ruled (L2) | — | created by `docketkit install` |
+| `work/compare/README.md` | a fork opens, closes, or its trigger fires | — | created by `docketkit install` |
+| `work/proposals/README.md` | an idea is filed, graduates, or is rejected | — | created by `docketkit install` |
+| `docs/GLOSSARY.md` | a term is coined or redefined | — | created by `docketkit install` |
+| `records/README.md` | a record's state, ownership or number changes | — | created by `docketkit install` |
+| `records/TEMPLATE.md` | the convention changes | — | created by `docketkit install` |
 
 ---
 
